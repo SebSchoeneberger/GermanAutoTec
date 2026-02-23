@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+body {
+    position: relative;
+    margin: 0;
+    min-height: 100vh;
+    background-color: #1C262D;
+
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+
+    color: white;
+    font-family: nunito, sans-serif;
+    text-align: center;
+}
+
+.bg {
+    position: absolute;
+    inset: 0;
+    background: url('./Img/Untitled design (4).png') center/cover no-repeat;
+    opacity: 0.5;
+    z-index: -1;
+  }
+
+.content {
+    position: relative;
+    z-index: 1;
+  }
+
+  main {
+      display: flex;
+      flex-direction:column;
+      align-items: center;
+      justify-content:center;
+      align-items: center;
+      padding: 20px;
+      gap: 1.5rem;
+  }
+
+.content h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+}
+
+.content h2 {
+    font-size: 2.5rem;
+    font-weight:bold
+}
+
+.content h3 {
+    font-size: 2rem;
+    font-weight: semi-bold;
+}
+
+.content p {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    max-width: 800px;
+    background-color: rgba(28, 38, 45, 0.295);
+}
+img {
+    max-width: 50%;
+    height: auto;
+}
+
+.social {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+  }
+  
+  .social li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    font-size: 1rem;
+  }
+  
+  .social li img {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+    display: block;
+  }
+
+  .social li a:hover img {
+    transform: scale(1.1);
+  }
+
+  .social li a:hover {
+    color: #00A4CCFF;
+    text-decoration: underline;
+  }
+  
+  
+
+/* footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    display: flex;        
+    justify-content: center;  
+    align-items: center;    
+    padding: 10px;
+    background-color: rgba(28, 38, 45, 0.8);
+  } */
+
+/* Responsive: Tablet & small desktop */
+@media (max-width: 768px) {
+    .content {
+      padding: 16px;
+    }
+    .content h1 {
+      font-size: 2.8rem;
+    }
+    .content h3 {
+      font-size: 1.8rem;
+    }
+    .content p {
+      font-size: 1.1rem;
+      max-width: 100%;
+    }
+    img {
+      max-width: 70%;
+    }
+    ul {
+      gap: 1rem;
+    }
+  }
+  
+  /* Responsive: Mobile phones */
+  @media (max-width: 480px) {
+    .content {
+      padding: 12px;
+    }
+    .content h1 {
+      font-size: 2.2rem;
+    }
+    .content h3 {
+      font-size: 1.4rem;
+    }
+    .content p {
+      font-size: 1rem;
+    }
+    img {
+      max-width: 90%;
+    }
+    ul {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+  

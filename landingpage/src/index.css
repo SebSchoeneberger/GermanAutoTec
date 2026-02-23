@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scrolling; prevent horizontal scroll/overscroll on mobile */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+@layer base {
+  body {
+    @apply antialiased bg-white dark:bg-[#0a0a0b] text-gray-800 dark:text-gray-100;
+    touch-action: pan-y;
+  }
+}
+
+/* Brand gradient and border utilities – use hex to avoid theme resolution issues */
+@layer utilities {
+  .text-gradient-hero {
+    background: linear-gradient(to right, #ffffff, #b4b7b8, #8C9090);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .border-gradient-brand {
+    border: 1px solid transparent;
+    background: linear-gradient(#0a0a0b, #0a0a0b) padding-box,
+                linear-gradient(135deg, #1C262D, #8C9090) border-box;
+  }
+}
+
+/* Telegram FAB position: safe area aware */
+.telegram-fab {
+  right: max(1.5rem, env(safe-area-inset-right, 0px));
+  bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 430px) {
+  .telegram-fab {
+    right: max(2rem, env(safe-area-inset-right, 0px));
+    bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Very subtle noise overlay */
+.noise-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}

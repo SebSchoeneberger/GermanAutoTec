@@ -1,0 +1,148 @@
+{
+    "nav": {
+      "services": "Leistungen",
+      "about": "Über uns",
+      "gallery": "Galerie",
+      "faq": "FAQ",
+      "contact": "Kontakt",
+      "messageTelegram": "Schreiben Sie uns auf Telegram",
+      "ariaLight": "Zum hellen Modus wechseln",
+      "ariaDark": "Zum dunklen Modus wechseln",
+      "ariaMenuOpen": "Menü öffnen",
+      "ariaMenuClose": "Menü schließen"
+    },
+    "hero": {
+      "badge": "Addis Abeba, Äthiopien · Mercedes-Werkstatt",
+      "title1": "Premium-Service",
+      "title2": "für Ihren Mercedes.",
+      "subtitle": "Alles, was Ihr Fahrzeug braucht: Wartung, Reparaturen, Diagnose und Fahrzeugaufbereitung – alles an einem vertrauenswürdigen Ort.",
+      "ctaContact": "Kontakt aufnehmen",
+      "ctaServices": "Unsere Leistungen",
+      "garage": "Werkstatt",
+      "garageSub": "Nur Mercedes",
+      "detailing": "Detailing",
+      "detailingSub": "Alle Marken",
+      "scrollHint": "Scrollen",
+      "ariaScroll": "Zu den Leistungen scrollen",
+      "altImage": "Premium-Mercedes-Fahrzeug – German AutoTec ist spezialisiert auf Mercedes-Service und Fahrzeugaufbereitung in Addis Abeba",
+      "altLogo": "Mercedes-Spezialistenservice"
+    },
+    "services": {
+      "eyebrow": "Unser Angebot",
+      "heading": "Unsere Leistungen",
+      "intro": "Von Mercedes-Wartung und Diagnose bis zur vollständigen Fahrzeugaufbereitung – ein umfassendes Angebot professioneller Kfz-Dienstleistungen.",
+      "garageTitle": "Werkstatt",
+      "detailingTitle": "Fahrzeugaufbereitung",
+      "garage": {
+        "diagnosisTitle": "Diagnose",
+        "diagnosisDesc": "Moderne Diagnosetechnik und erfahrene Kfz-Mechatroniker zur präzisen Fehleranalyse und fundierten Lösungsempfehlung.",
+        "repairTitle": "Reparaturen",
+        "repairDesc": "Hochwertige mechanische und elektrische Reparaturen für Ihren Mercedes. Wir arbeiten nach bewährten Verfahren, Herstellervorgaben und mit zuverlässigen Ersatzteilen.",
+        "maintenanceTitle": "Wartung",
+        "maintenanceDesc": "Regelmäßige Wartung und vorbeugende Instandhaltung für einen reibungslosen Fahrzeugbetrieb – fachgerecht nach Herstellervorgaben.",
+        "interiorTitle": "Innenreinigung",
+        "interiorDesc": "Gründliche Innenreinigung, Lederpflege und Schutz. Ihr Innenraum bleibt sauber, gepflegt und langlebig.",
+        "polishTitle": "Politur & Keramikbeschichtung",
+        "polishDesc": "Lackkorrektur, Politur und langlebige Keramikbeschichtung zum Schutz und zur Aufwertung der Fahrzeugoberfläche.",
+        "dentTitle": "Dellenreparatur",
+        "dentDesc": "Lackschadenfreie Dellenreparatur und kleinere Karosseriearbeiten zur Wiederherstellung der Fahrzeugoptik."
+      }
+    },
+    "about": {
+      "eyebrow": "Über uns",
+      "heading": "Mercedes-Service in Addis",
+      "intro": "Mercedes-Spezialisten in Addis Abeba, Äthiopien – ausgebildet, zertifiziert und für Sie da.",
+      "p1": "German AutoTec wurde 2021 gegründet und ist eine spezialisierte Werkstatt für Mercedes-Benz Fahrzeuge in Addis Abeba. Unser Team besteht aus mehreren in Deutschland ausgebildeten und zertifizierten Technikern, unterstützt von qualifiziertem Werkstattpersonal für einen reibungslosen und professionellen Ablauf.",
+      "p2": "Wir verbinden moderne Ausrüstung und zuverlässige Diagnose mit einem starken Fokus auf Kundenservice und Professionalität. Ob Wartung, Reparatur oder hochwertige Fahrzeugaufbereitung – von der Innenpflege bis zur Politur und Keramikbeschichtung – wir liefern Qualität, auf die Sie sich verlassen können.",
+      "p3": "Dank unseres mehrsprachigen Services gestalten wir Ihren Besuch unkompliziert und stressfrei. Mit German AutoTec entscheiden Sie sich für Fachkompetenz, Transparenz und ein Team, das sich um Ihr Fahrzeug kümmert.",
+      "tags": ["Mercedes-Service", "Zertifiziert", "Mehrsprachig"],
+      "foundersHeading": "Gründer",
+      "foundersIntro": "Wir haben German AutoTec gemeinsam gegründet – alle mit Erfahrung als Mercedes-Techniker.",
+      "founders": {
+        "elias": {
+          "position": "Mitgründer und Mechaniker",
+          "bio": "Erfahrener Kfz-Mechaniker mit Spezialisierung auf Automatikgetriebe. Über 15 Jahre bei Orbis Trading als Senior-Techniker und Leiter der Qualitätskontrolle. Ausgeprägte soziale Kompetenz, ehemaliger Vorsitzender der Mitarbeitervertretung bei Orbis Trading."
+        },
+        "milkias": {
+          "position": "Mitgründer und Geschäftsführer",
+          "bio": "Ausgebildet am Selam Technical and Vocational College in Addis Abeba. Neun Jahre Berufserfahrung beim offiziellen Mercedes-Benz Partner Orbis Trading. Zertifizierter Diagnosetechniker von Mercedes-Benz Deutschland (Berlin & Stuttgart). Seit fünf Jahren Geschäftsführer von German AutoTec."
+        },
+        "sebastian": {
+          "position": "Mitgründer und Fahrzeugaufbereiter",
+          "bio": "Zertifizierter Kfz-Mechatroniker, ausgebildet bei Mercedes-Benz. Mehrjährige Werkstatterfahrung in Deutschland vor der Mitgründung von German AutoTec. Schwerpunkt aktuell auf Fahrzeugaufbereitung, einschließlich Politur und Keramikbeschichtung."
+        }
+      },
+      "ariaLinkedIn": "{{name}} auf LinkedIn",
+      "altWorkshop": "Professionelle Kfz-Werkstatt – German AutoTec arbeitet mit moderner Ausrüstung und erfahrenen Technikern in Addis Abeba"
+    },
+    "gallery": {
+      "eyebrow": "Portfolio",
+      "heading": "Unsere Arbeiten",
+      "intro": "Werkstatt, Fahrzeuge und die Qualität unserer Arbeit.",
+      "emptyHint": "Fügen Sie Bilder hinzu, um sie hier anzuzeigen.",
+      "showLess": "Weniger anzeigen",
+      "loadMore": "Mehr laden",
+      "ariaClose": "Schließen",
+      "ariaPrev": "Zurück",
+      "ariaNext": "Weiter"
+    },
+    "contact": {
+      "eyebrow": "Kontakt",
+      "heading": "Kontaktieren Sie uns",
+      "intro": "Erreichen Sie uns über WhatsApp, Telegram oder telefonisch. Wir helfen Ihnen gerne weiter.",
+      "location": "Standort",
+      "openingHours": "Öffnungszeiten",
+      "seeReviews": "auf Google · Bewertungen ansehen",
+      "callUs": "Anrufen",
+      "chatWhatsApp": "Über WhatsApp schreiben",
+      "messageTelegram": "Über Telegram schreiben",
+      "followUs": "Folgen Sie uns",
+      "ariaMap": "Standort von German AutoTec"
+    },
+    "footer": {
+      "tagline": "Premium-Mercedes-Service und professionelle Fahrzeugaufbereitung in Addis Abeba, Äthiopien. Kompetenz und Sorgfalt, denen Sie vertrauen können.",
+      "addressTitle": "Adresse",
+      "contactTitle": "Kontakt",
+      "hoursTitle": "Öffnungszeiten",
+      "copyright": "© {{year}} German AutoTec. Alle Rechte vorbehalten."
+    },
+    "contactConstants": {
+      "addressLine1": "Haya Hulet (22)",
+      "addressLine2": "Signal Akababi",
+      "city": "Addis Abeba",
+      "country": "Äthiopien",
+      "weekdays": "Mo – Fr: 8:00 – 16:00",
+      "saturday": "Sa: 8:00 – 12:00"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "heading": "Häufig gestellte Fragen",
+      "intro": "Kurze Antworten auf häufige Fragen. Benötigen Sie weitere Informationen? Kontaktieren Sie uns.",
+      "items": [
+        {
+          "q": "Arbeiten Sie auch an anderen Marken?",
+          "a": "Unsere Werkstattleistungen (Wartung, Reparaturen, Diagnose) bieten wir ausschließlich für Mercedes-Benz an. Fahrzeugaufbereitung – Innenreinigung, Politur und Keramikbeschichtung – führen wir für alle Fahrzeugmarken durch."
+        },
+        {
+          "q": "Wie sind Ihre Öffnungszeiten?",
+          "a": "Wir sind von Montag bis Freitag von 8:00 bis 16:00 Uhr sowie samstags von 8:00 bis 12:00 Uhr geöffnet. Sonntags geschlossen."
+        },
+        {
+          "q": "Benötige ich einen Termin?",
+          "a": "Für größere Arbeiten empfehlen wir eine vorherige Terminvereinbarung per Telefon oder Nachricht (WhatsApp/Telegram). Für kurze Checks oder Fahrzeugaufbereitung sind spontane Besuche oft möglich – am besten vorher kurz anrufen."
+        },
+        {
+          "q": "Verkaufen Sie Ersatzteile?",
+          "a": "Einige Ersatzteile halten wir für unsere Kunden auf Lager. Für weitere Teile arbeiten wir eng mit Mercedes-Ersatzteilhändlern und Importeuren zusammen. Kontaktieren Sie uns, wir beraten Sie gerne."
+        },
+        {
+          "q": "Bieten Sie Abhol- oder Bringservice an?",
+          "a": "Unsere Leistungen konzentrieren sich auf Werkstatt- und Aufbereitungsarbeiten vor Ort. Bei Bedarf können wir Ihnen Transportmöglichkeiten empfehlen – sprechen Sie uns bei der Terminvereinbarung an."
+        },
+        {
+          "q": "Wie erhalte ich einen Kostenvoranschlag?",
+          "a": "Kontaktieren Sie uns per WhatsApp, Telegram oder Telefon. Beschreiben Sie Ihr Fahrzeug und den gewünschten Service (Wartung, Reparatur oder Fahrzeugaufbereitung), und wir geben Ihnen eine erste Einschätzung. Für einen genauen Kostenvoranschlag kann eine Besichtigung des Fahrzeugs erforderlich sein."
+        }
+      ]
+    }
+  }

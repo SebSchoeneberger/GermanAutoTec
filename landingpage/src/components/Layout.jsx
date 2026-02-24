@@ -3,6 +3,7 @@ import ScrollProgress from './ScrollProgress'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import TelegramFAB from './TelegramFAB'
+import BackToTop from './BackToTop'
 
 export default function Layout({ children }) {
   const { theme, toggleTheme } = useTheme()
@@ -15,6 +16,7 @@ export default function Layout({ children }) {
       <main>{children}</main>
 
       <Footer />
+      <BackToTop />
       <TelegramFAB />
     </div>
   )

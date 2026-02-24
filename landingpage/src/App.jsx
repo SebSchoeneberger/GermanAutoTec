@@ -6,6 +6,7 @@ import SectionSkeleton from './components/SectionSkeleton'
 
 const About = lazy(() => import('./components/About'))
 const Gallery = lazy(() => import('./components/Gallery'))
+const FAQ = lazy(() => import('./components/FAQ'))
 const Contact = lazy(() => import('./components/Contact'))
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <Suspense fallback={<SectionSkeleton />}>
         <About />
         <Gallery />
+        <FAQ />
         <Contact />
       </Suspense>
     </Layout>

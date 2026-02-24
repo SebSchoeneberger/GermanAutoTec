@@ -1,36 +1,40 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { FadeInUp } from './ScrollReveal'
 import {
   MAP_EMBED_SRC,
   GOOGLE_REVIEWS_LINK,
   GOOGLE_RATING,
   GOOGLE_MAPS_SEARCH_URL,
-  ADDRESS,
-  OPENING_HOURS,
   PHONE_NUMBER,
   WHATSAPP_URL,
   TELEGRAM_URL,
   IconWhatsApp,
   IconTelegram,
   socialLinksFollow,
+  getTranslatedAddress,
+  getTranslatedOpeningHours,
 } from '../constants/contact'
 
 export default function Contact() {
+  const { t } = useTranslation()
+  const ADDRESS = getTranslatedAddress(t)
+  const OPENING_HOURS = getTranslatedOpeningHours(t)
   return (
     <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-white/[0.02]" aria-labelledby="contact-heading">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12 lg:mb-14">
           <FadeInUp delayOrder={0}>
-            <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-[0.2em]">Get in touch</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-[0.2em]">{t('contact.eyebrow')}</span>
           </FadeInUp>
           <FadeInUp delayOrder={1}>
             <h2 id="contact-heading" className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1C262D] dark:text-white">
-              Contact us
+              {t('contact.heading')}
             </h2>
           </FadeInUp>
           <FadeInUp delayOrder={2}>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-              Reach us on WhatsApp, Telegram, or give us a call. We're here to help.
+              {t('contact.intro')}
             </p>
           </FadeInUp>
         </div>
@@ -43,7 +47,7 @@ export default function Contact() {
                 width="100%"
                 height="100%"
                 style={{ minHeight: '260px' }}
-                title="German AutoTec location"
+                title={t('contact.ariaMap')}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -65,7 +69,7 @@ export default function Contact() {
               <span className="inline-flex items-center gap-1.5">
                 <span className="font-semibold text-[#1C262D] dark:text-white">{GOOGLE_RATING}</span>
                 <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                on Google · See reviews
+                {t('contact.seeReviews')}
               </span>
             </a>
           </FadeInUp>
@@ -87,7 +91,7 @@ export default function Contact() {
                       </svg>
                     </span>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Location</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('contact.location')}</p>
                       <p className="text-sm font-medium text-[#1C262D] dark:text-white mt-0.5">{ADDRESS.line1}, {ADDRESS.line2}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{ADDRESS.city}, {ADDRESS.country}</p>
                     </div>
@@ -97,7 +101,7 @@ export default function Contact() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </span>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Opening hours</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('contact.openingHours')}</p>
                       <p className="text-sm text-[#1C262D] dark:text-white font-medium mt-0.5">{OPENING_HOURS.weekdays}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{OPENING_HOURS.saturday}</p>
                     </div>
@@ -113,7 +117,7 @@ export default function Contact() {
                     <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    Call us
+                    {t('contact.callUs')}
                   </motion.a>
                   <motion.a
                     href={WHATSAPP_URL}
@@ -124,7 +128,7 @@ export default function Contact() {
                     whileTap={{ scale: 0.99 }}
                   >
                     <img src={IconWhatsApp} alt="" className="w-6 h-6 shrink-0" aria-hidden />
-                    Chat on WhatsApp
+                    {t('contact.chatWhatsApp')}
                   </motion.a>
                   <motion.a
                     href={TELEGRAM_URL}
@@ -135,12 +139,12 @@ export default function Contact() {
                     whileTap={{ scale: 0.99 }}
                   >
                     <img src={IconTelegram} alt="" className="w-6 h-6 shrink-0" aria-hidden />
-                    Message on Telegram
+                    {t('contact.messageTelegram')}
                   </motion.a>
                 </div>
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-white/10 text-center sm:text-left">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-4">
-                    Follow us
+                    {t('contact.followUs')}
                   </p>
                   <div className="flex gap-4 justify-center sm:justify-start">
                     {socialLinksFollow.map(({ href, label, icon }) => (

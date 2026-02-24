@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { FadeInUp } from './ScrollReveal'
 import { GALLERY_IMAGES, INITIAL_COUNT, LOAD_MORE_COUNT } from '../constants/gallery'
 
 export default function Gallery() {
+  const { t } = useTranslation()
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const [loaded, setLoaded] = useState(() => new Set())
@@ -53,23 +55,23 @@ export default function Gallery() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <FadeInUp delayOrder={0}>
-            <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-[0.2em]">Portfolio</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold uppercase tracking-[0.2em]">{t('gallery.eyebrow')}</span>
           </FadeInUp>
           <FadeInUp delayOrder={1}>
             <h2 id="gallery-heading" className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1C262D] dark:text-white">
-              Our work
+              {t('gallery.heading')}
             </h2>
           </FadeInUp>
           <FadeInUp delayOrder={2}>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-              Workshop, vehicles, and the quality we deliver.
+              {t('gallery.intro')}
             </p>
           </FadeInUp>
         </div>
 
         {GALLERY_IMAGES.length === 0 ? (
           <FadeInUp delayOrder={3} className="mt-12 text-center py-12 rounded-2xl bg-gray-50 dark:bg-white/[0.04] border border-dashed border-gray-200 dark:border-white/10">
-            <p className="text-gray-500 dark:text-gray-400">Add images to <code className="text-sm bg-gray-200/50 dark:bg-white/10 px-1.5 py-0.5 rounded">src/assets/gallery</code> to see them here.</p>
+            <p className="text-gray-500 dark:text-gray-400">{t('gallery.emptyHint')}</p>
           </FadeInUp>
         ) : (
           <>
@@ -114,7 +116,7 @@ export default function Gallery() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Show less
+                  {t('gallery.showLess')}
                 </motion.button>
               )}
               {hasMore && (
@@ -125,7 +127,7 @@ export default function Gallery() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Load more
+                  {t('gallery.loadMore')}
                 </motion.button>
               )}
             </div>
@@ -143,7 +145,7 @@ export default function Gallery() {
                     type="button"
                     onClick={close}
                     className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white shrink-0"
-                    aria-label="Close"
+                    aria-label={t('gallery.ariaClose')}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -151,7 +153,7 @@ export default function Gallery() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); goPrev() }}
                     className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white shrink-0"
-                    aria-label="Previous"
+                    aria-label={t('gallery.ariaPrev')}
                   >
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                   </button>
@@ -172,7 +174,7 @@ export default function Gallery() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); goNext() }}
                     className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white shrink-0"
-                    aria-label="Next"
+                    aria-label={t('gallery.ariaNext')}
                   >
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </button>

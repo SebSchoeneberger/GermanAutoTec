@@ -1,13 +1,17 @@
+import { useTranslation } from 'react-i18next'
 import {
   socialLinks,
-  ADDRESS,
-  OPENING_HOURS,
   PHONE_NUMBER,
   PHONE_DISPLAY,
   EMAIL,
+  getTranslatedAddress,
+  getTranslatedOpeningHours,
 } from '../constants/contact'
 
 export default function Footer() {
+  const { t } = useTranslation()
+  const ADDRESS = getTranslatedAddress(t)
+  const OPENING_HOURS = getTranslatedOpeningHours(t)
   return (
     <footer className="relative bg-gray-900 dark:bg-black text-gray-400 overflow-hidden" role="contentinfo">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-[#8C9090]/40 to-transparent" aria-hidden="true" />
@@ -16,11 +20,11 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg">German AutoTec</h3>
             <p className="mt-3 text-sm leading-relaxed">
-              Premium Mercedes service and car detailing in Addis Ababa. Expertise and care you can trust.
+              {t('footer.tagline')}
             </p>
           </div>
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">Address</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">{t('footer.addressTitle')}</h3>
             <address className="mt-3 text-sm not-italic leading-relaxed">
               {ADDRESS.line1} <br />
               {ADDRESS.line2} <br />
@@ -28,7 +32,7 @@ export default function Footer() {
             </address>
           </div>
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">Contact</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">{t('footer.contactTitle')}</h3>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <a href={`tel:${PHONE_NUMBER.replace(/\s/g, '')}`} className="text-gray-400 hover:text-[#8C9090] transition">
@@ -43,7 +47,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">Opening hours</h3>
+            <h3 className="text-white font-semibold text-sm uppercase tracking-wider">{t('footer.hoursTitle')}</h3>
             <p className="mt-3 text-sm leading-relaxed">
               {OPENING_HOURS.weekdays}<br />
               {OPENING_HOURS.saturday}
@@ -51,7 +55,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <p className="text-sm text-gray-500 order-2 sm:order-1">© {new Date().getFullYear()} German AutoTec. All rights reserved.</p>
+          <p className="text-sm text-gray-500 order-2 sm:order-1">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex gap-4 justify-center sm:justify-end order-1 sm:order-2" aria-label="Social links">
             {socialLinks.map(({ href, label, icon }) => (
               <a

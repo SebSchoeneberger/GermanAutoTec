@@ -1,0 +1,148 @@
+{
+  "nav": {
+    "services": "Services",
+    "about": "About",
+    "gallery": "Gallery",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "messageTelegram": "Message us on Telegram",
+    "ariaLight": "Switch to light mode",
+    "ariaDark": "Switch to dark mode",
+    "ariaMenuOpen": "Open menu",
+    "ariaMenuClose": "Close menu"
+  },
+  "hero": {
+    "badge": "Addis Ababa, Ethiopia · Mercedes Workshop",
+    "title1": "Professional care",
+    "title2": "for your Mercedes.",
+    "subtitle": "Everything your Car needs: maintenance, repairs, diagnostics, and detailing all in one trusted place.",
+    "ctaContact": "Get in touch",
+    "ctaServices": "Our services",
+    "garage": "Garage",
+    "garageSub": "Mercedes only",
+    "detailing": "Detailing",
+    "detailingSub": "All brands",
+    "scrollHint": "Scroll",
+    "ariaScroll": "Scroll to services",
+    "altImage": "Premium Mercedes vehicle - German AutoTec specializes in Mercedes care and detailing in Addis Ababa",
+    "altLogo": "Mercedes specialist care"
+  },
+  "services": {
+    "eyebrow": "What we offer",
+    "heading": "Our services",
+    "intro": "From Mercedes maintenance and diagnostics to full detailing—a complete range of professional automotive services.",
+    "garageTitle": "Garage",
+    "detailingTitle": "Detailing",
+    "garage": {
+      "diagnosisTitle": "Diagnosis",
+      "diagnosisDesc": "Modern diagnostic equipment and experienced technicians to accurately identify issues and recommend the right solutions.",
+      "repairTitle": "Repair",
+      "repairDesc": "Quality mechanical and electrical repairs for your Mercedes. We use proven procedures, manufacturer standards, and reliable parts so your car is fixed right.",
+      "maintenanceTitle": "Maintenance",
+      "maintenanceDesc": "Routine servicing and preventive care to keep your vehicle running smoothly. Specialist care following manufacturer standards.",
+      "interiorTitle": "Interior cleaning",
+      "interiorDesc": "Thorough interior cleaning, leather care, and protection. Your cabin stays fresh and well-maintained.",
+      "polishTitle": "Polish & ceramic coating",
+      "polishDesc": "Paint correction, polish, and long-lasting ceramic coating to protect and enhance your vehicle's finish.",
+      "dentTitle": "Dent repair",
+      "dentDesc": "Paintless dent repair and minor body work to restore your car's appearance."
+    }
+  },
+  "about": {
+    "eyebrow": "About us",
+    "heading": "Expertise you can trust",
+    "intro": "Mercedes specialists in Addis Ababa, Ethiopia—trained, certified, and here for you.",
+    "p1": "Founded in 2021, German AutoTec is a dedicated garage specializing exclusively in Mercedes-Benz vehicles in Addis Ababa. Our team includes multiple technicians trained and certified in Germany, supported by skilled staff across the workshop to ensure smooth, professional operations.",
+    "p2": "We combine modern equipment and reliable diagnostics with a strong focus on customer service and professionalism. Whether you need routine maintenance, repairs, or premium detailing—from interior care to polish and ceramic coating—we deliver quality you can depend on.",
+    "p3": "We offer multilingual service to make your visit smooth and stress-free. When you choose German AutoTec, you get expertise, transparency, and a team that cares about your vehicle.",
+    "tags": ["Mercedes specialist", "Certified technicians", "Multilingual service"],
+    "foundersHeading": "Founders",
+    "foundersIntro": "We founded German AutoTec together—all of us former Mercedes technicians.",
+    "founders": {
+      "elias": {
+        "position": "Co-Founder and Technician",
+        "bio": "Experienced mechanic specialized in automatic transmissions, with over 15 years at Orbis Trading as a senior mechanic and quality control lead. Strong people skills—led the employee union at Orbis Trading."
+      },
+      "milkias": {
+        "position": "Co-Founder and General Manager",
+        "bio": "Trained at Selam Technical and Vocational College in Addis Ababa, with 9 years at the official Mercedes-Benz partner (Orbis Trading). Certified diagnostic technician from Mercedes-Benz Germany (Berlin & Stuttgart). General manager at German AutoTec for the last 5 years."
+      },
+      "sebastian": {
+        "position": "Co-Founder and Detailer",
+        "bio": "Certified mechatronic technician, trained at Mercedes-Benz. Gained several years of workshop experience in Germany before co-founding German AutoTec. Currently focusing on the detailing side of the business, including polishing and ceramic coating."
+      }
+    },
+    "ariaLinkedIn": "{{name}} on LinkedIn",
+    "altWorkshop": "Professional car workshop - German AutoTec uses modern equipment and expert technicians in Addis Ababa"
+  },
+  "gallery": {
+    "eyebrow": "Portfolio",
+    "heading": "Our work",
+    "intro": "Workshop, vehicles, and the quality we deliver.",
+    "emptyHint": "Add images to see them here.",
+    "showLess": "Show less",
+    "loadMore": "Load more",
+    "ariaClose": "Close",
+    "ariaPrev": "Previous",
+    "ariaNext": "Next"
+  },
+  "contact": {
+    "eyebrow": "Get in touch",
+    "heading": "Contact us",
+    "intro": "Reach us on WhatsApp, Telegram, or give us a call. We're here to help.",
+    "location": "Location",
+    "openingHours": "Opening hours",
+    "seeReviews": "on Google · See reviews",
+    "callUs": "Call us",
+    "chatWhatsApp": "Chat on WhatsApp",
+    "messageTelegram": "Message on Telegram",
+    "followUs": "Follow us",
+    "ariaMap": "German AutoTec location"
+  },
+  "footer": {
+    "tagline": "Premium Mercedes service and car detailing in Addis Ababa, Ethiopia. Expertise and care you can trust.",
+    "addressTitle": "Address",
+    "contactTitle": "Contact",
+    "hoursTitle": "Opening hours",
+    "copyright": "© {{year}} German AutoTec. All rights reserved."
+  },
+  "contactConstants": {
+    "addressLine1": "Haya Hulet (22)",
+    "addressLine2": "Signal Akababi",
+    "city": "Addis Ababa",
+    "country": "Ethiopia",
+    "weekdays": "Mon – Fri: 8:00 – 16:00",
+    "saturday": "Sat: 8:00 – 12:00"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "heading": "Frequently asked questions",
+    "intro": "Quick answers to common questions. Need more? Get in touch.",
+    "items": [
+      {
+        "q": "Do you work on other brands?",
+        "a": "Our garage services (maintenance, repairs, diagnostics) are for Mercedes-Benz only. Detailing—interior cleaning, polish, ceramic coating—we offer for all car brands."
+      },
+      {
+        "q": "What are your opening hours?",
+        "a": "We are open Monday to Friday 8:00–16:00 and Saturday 8:00–12:00. Closed on Sundays."
+      },
+      {
+        "q": "Do I need an appointment?",
+        "a": "We recommend calling or messaging us (WhatsApp/Telegram) to arrange a time, especially for larger jobs. For quick checks or detailing, drop-ins are often possible—best to call ahead."
+      },
+      {
+        "q": "Do you sell spare parts?",
+        "a": "We keep some parts in stock for our customers. For other needs we work closely with Mercedes part suppliers and importers. Get in touch and we can point you in the right direction."
+      },
+      {
+        "q": "Do you offer pickup or drop-off?",
+        "a": "We focus on workshop and detailing at our location. If you need transport, we can suggest options—ask us when you book."
+      },
+      {
+        "q": "How can I get a quote?",
+        "a": "Contact us via WhatsApp, Telegram, or phone. Describe your car and what you need (service, repair, or detailing), and we’ll give you an indication. For accurate quotes we may need to see the vehicle."
+      }
+    ]
+  }
+}

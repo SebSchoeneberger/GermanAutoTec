@@ -15,16 +15,40 @@ export const EMAIL = 'workshop@german-autotec.com'
 export const WHATSAPP_URL = 'https://wa.me/251964198222'
 export const TELEGRAM_URL = 'https://t.me/GermanAutoTec'
 
-export const ADDRESS = {
-  line1: 'Haya Hulet (22)',
-  line2: 'Signal Akababi',
-  city: 'Addis Ababa',
-  country: 'Ethiopia',
+/** Translation keys for address and opening hours (strings live in locales). */
+const ADDRESS_KEYS = {
+  line1: 'contactConstants.addressLine1',
+  line2: 'contactConstants.addressLine2',
+  city: 'contactConstants.city',
+  country: 'contactConstants.country',
 }
 
-export const OPENING_HOURS = {
-  weekdays: 'Mon – Fri: 8:00 – 16:00',
-  saturday: 'Sat: 8:00 – 12:00',
+const OPENING_HOURS_KEYS = {
+  weekdays: 'contactConstants.weekdays',
+  saturday: 'contactConstants.saturday',
+}
+
+/**
+ * Returns translated ADDRESS. Pass the i18n t function from useTranslation().
+ * Use in Contact and Footer so address stays in one place and is localized.
+ */
+export function getTranslatedAddress(t) {
+  return {
+    line1: t(ADDRESS_KEYS.line1),
+    line2: t(ADDRESS_KEYS.line2),
+    city: t(ADDRESS_KEYS.city),
+    country: t(ADDRESS_KEYS.country),
+  }
+}
+
+/**
+ * Returns translated OPENING_HOURS. Pass the i18n t function from useTranslation().
+ */
+export function getTranslatedOpeningHours(t) {
+  return {
+    weekdays: t(OPENING_HOURS_KEYS.weekdays),
+    saturday: t(OPENING_HOURS_KEYS.saturday),
+  }
 }
 
 export const MAP_EMBED_SRC =

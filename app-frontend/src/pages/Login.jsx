@@ -1,81 +1,111 @@
-import { useState, useContext } from "react";
-import { signIn } from "../services/userApi";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { signIn } from '../services/userApi';
+import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const baseInputClass =
+  'w-full px-4 py-3 rounded-xl border bg-white dark:bg-white/5 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 transition';
+
+const normalInput = `${baseInputClass} border-gray-200 dark:border-white/10 focus:ring-brand-dark/50 dark:focus:ring-white/30 focus:border-brand-dark dark:focus:border-white/20`;
+const errorInput  = `${baseInputClass} border-red-400 dark:border-red-500 focus:ring-red-400/40 dark:focus:ring-red-500/40`;
+
+const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5';
+
+const FieldError = ({ msg }) =>
+  msg ? <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{msg}</p> : null;
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const data = await signIn(formData);
-      if (data.status === 'success') {
-        login(data.user, data.token);
-        toast.success('Successfully logged in!');
-        navigate("/dashboard");
+      const res = await signIn(data);
+      if (res.status === 'success') {
+        login(res.user, res.token);
+        toast.success('Successfully signed in.');
+        navigate('/dashboard');
       } else {
-        toast.error(data.message || 'Login failed');
+        toast.error(res.message || 'Sign in failed');
       }
     } catch (error) {
-      toast.error(error.message || 'An error occurred during login');
+      toast.error(error?.message || 'An error occurred during sign in');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email" className="block text-gray-700 mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            className="w-full p-2 border rounded-md"
-            placeholder="Enter your email"
-            onChange={handleChange}
-          />
+    <div className="min-h-[60vh] flex items-center justify-center py-12">
+      <div className="w-full max-w-md">
+        <div className="border-gradient-brand rounded-2xl bg-white dark:bg-[#141518] p-8 sm:p-10 shadow-xl shadow-gray-200/50 dark:shadow-black/30">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-brand-dark dark:text-white">Sign in</h1>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">German AutoTec employee portal</p>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+            <div>
+              <label htmlFor="email" className={labelClass}>Email</label>
+              <input
+                type="email"
+                id="email"
+                className={errors.email ? errorInput : normalInput}
+                placeholder="you@company.com"
+                autoComplete="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
+              />
+              <FieldError msg={errors.email?.message} />
+            </div>
+
+            <div>
+              <label htmlFor="password" className={labelClass}>Password</label>
+              <input
+                type="password"
+                id="password"
+                className={errors.password ? errorInput : normalInput}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                {...register('password', { required: 'Password is required' })}
+              />
+              <FieldError msg={errors.password?.message} />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {isLoading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <Link to="/" className="text-brand-dark dark:text-brand-light hover:underline focus:outline-none focus:ring-2 focus:ring-brand-dark/50 dark:focus:ring-white/30 rounded">
+              Back to home
+            </Link>
+          </p>
         </div>
-        <div>
-          <label htmlFor="password" className="block text-gray-700 mb-2">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            className="w-full p-2 border rounded-md"
-            placeholder="Enter your password"
-            onChange={handleChange}
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full bg-blue-600 text-white py-2 rounded-md 
-            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-        >
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 };
 
-export default Login; 
+export default Login;

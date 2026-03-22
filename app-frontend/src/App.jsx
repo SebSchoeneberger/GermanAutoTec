@@ -5,7 +5,10 @@ import Profile from './pages/Profile';
 import Login from './pages/Login';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Dashboard from './pages/Dashboard';
+import SpareParts from './pages/SpareParts';
+import ActivityPage from './pages/ActivityPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,15 +19,19 @@ const router = createBrowserRouter(
       <Route element={<ProtectedLayout />}>
         <Route path="profile" element={<Profile />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="spare-parts" element={<SpareParts />} />
+        <Route path="spare-parts/activity" element={<ActivityPage />} />
       </Route>
     </Route>,
   ),
 );
 
 const App = () => (
-  <AuthProvider>
-    <RouterProvider router={router} />
-  </AuthProvider>
+  <ThemeProvider>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  </ThemeProvider>
 );
 
 export default App;

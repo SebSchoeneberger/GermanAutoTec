@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import connectDB from "./db/db.js";
+import connectDB from "./DB/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import sparePartsRouter from "./routes/sparePartsRoutes.js";
 import userRouter from "./routes/userRoutes.js";

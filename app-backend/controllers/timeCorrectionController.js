@@ -231,7 +231,7 @@ export const approveTimeCorrectionRequest = asyncHandler(async (req, res) => {
     request.status = "approved";
     request.reviewedBy = req.user.id;
     request.reviewedAt = new Date();
-    request.reviewNote = req.body?.reviewNote ?? null;
+    request.reviewNote = typeof req.body?.reviewNote === "string" ? req.body.reviewNote : null;
     await request.save();
 
     res.status(200).json({

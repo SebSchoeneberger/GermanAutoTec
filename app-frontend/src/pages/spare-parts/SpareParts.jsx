@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
-import { useAuth } from '../hooks/useAuth';
-import { getParts, getCompatibilityOptions } from '../services/sparePartsApi';
-import { SORT_OPTIONS } from '../utils/sparePartsUtils';
-import SparePartCard from '../components/spareParts/SparePartCard';
-import SparePartDetailModal from '../components/spareParts/SparePartDetailModal';
-import AddEditPartModal from '../components/spareParts/AddEditPartModal';
-import SellPartModal from '../components/spareParts/SellPartModal';
-import RestockPartModal from '../components/spareParts/RestockPartModal';
-import PartsToolbar from '../components/spareParts/PartsToolbar';
-import Pagination from '../components/spareParts/Pagination';
-import PartsGridSkeleton from '../components/spareParts/PartsGridSkeleton';
-import EmptyInventoryState from '../components/spareParts/EmptyInventoryState';
-import ActiveFilterPills from '../components/spareParts/ActiveFilterPills';
+import { useAuth } from '../../hooks/useAuth';
+import { getParts, getCompatibilityOptions } from '../../services/sparePartsApi';
+import { SORT_OPTIONS } from '../../utils/sparePartsUtils';
+import SparePartCard from '../../components/spareParts/SparePartCard';
+import SparePartDetailModal from '../../components/spareParts/SparePartDetailModal';
+import AddEditPartModal from '../../components/spareParts/AddEditPartModal';
+import SellPartModal from '../../components/spareParts/SellPartModal';
+import RestockPartModal from '../../components/spareParts/RestockPartModal';
+import PartsToolbar from '../../components/spareParts/PartsToolbar';
+import Pagination from '../../components/spareParts/Pagination';
+import PartsGridSkeleton from '../../components/spareParts/PartsGridSkeleton';
+import EmptyInventoryState from '../../components/spareParts/EmptyInventoryState';
+import ActiveFilterPills from '../../components/spareParts/ActiveFilterPills';
 
 const LIMIT = 20;
 
@@ -47,7 +47,7 @@ const SpareParts = () => {
     if (debouncedSearch) {
       items.push({
         key:      'search',
-        label:    `Search: “${debouncedSearch}”`,
+        label:    `Search: "${debouncedSearch}"`,
         onRemove: () => { setSearchInput(''); setDebouncedSearch(''); setPage(1); },
       });
     }

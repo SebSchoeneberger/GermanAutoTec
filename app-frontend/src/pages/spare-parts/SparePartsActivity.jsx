@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import RecentActivity from '../components/RecentActivity';
+import { useAuth } from '../../hooks/useAuth';
+import RecentActivity from '../../components/spareParts/RecentActivity';
 
-const ActivityPage = () => {
+const SparePartsActivity = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -47,4 +47,4 @@ const RefreshIcon = () => (
   </svg>
 );
 
-export default ActivityPage;
+export default SparePartsActivity;

@@ -7,8 +7,8 @@ import ProtectedLayout from './layouts/ProtectedLayout';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Dashboard from './pages/Dashboard';
-import SpareParts from './pages/SpareParts';
-import ActivityPage from './pages/ActivityPage';
+import SpareParts from './pages/spare-parts/SpareParts';
+import SparePartsActivity from './pages/spare-parts/SparePartsActivity';
 import TimeHome from './pages/time/TimeHome';
 import TimeDisplay from './pages/time/TimeDisplay';
 import TimePunch from './pages/time/TimePunch';
@@ -26,7 +26,7 @@ const router = createBrowserRouter(
         <Route path="profile" element={<Profile />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="spare-parts" element={<SpareParts />} />
-        <Route path="spare-parts/activity" element={<ActivityPage />} />
+        <Route path="spare-parts/activity" element={<SparePartsActivity />} />
         <Route path="time" element={<Outlet />}>
           <Route index element={<TimeHome />} />
           <Route path="display" element={<TimeDisplay />} />

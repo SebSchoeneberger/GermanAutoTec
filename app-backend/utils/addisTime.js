@@ -54,7 +54,7 @@ export function isWorkDateInCorrectionWindow(workDateStr) {
   const wd = DateTime.fromISO(workDateStr, { zone: ADDIS_TZ }).startOf("day");
   if (!wd.isValid) return false;
   const today = DateTime.now().setZone(ADDIS_TZ).startOf("day");
-  const min = today.minus({ days: CORRECTION_LOOKBACK_DAYS });
+  const min = today.minus({ days: CORRECTION_LOOKBACK_DAYS - 1 });
   return wd.toMillis() >= min.toMillis() && wd.toMillis() <= today.toMillis();
 }
 
@@ -77,7 +77,7 @@ export function addisMonthToUtcRange(year, month) {
 /** For correction forms: selectable work dates in Addis (inclusive). */
 export function getCorrectionWindowPlainStrings() {
   const today = DateTime.now().setZone(ADDIS_TZ);
-  const min = today.minus({ days: CORRECTION_LOOKBACK_DAYS });
+  const min = today.minus({ days: CORRECTION_LOOKBACK_DAYS - 1 });
   return { minWorkDate: min.toISODate(), maxWorkDate: today.toISODate() };
 }
 

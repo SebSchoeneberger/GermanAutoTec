@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 export const createUser = asyncHandler(async (req, res) => {
 
     if (req.user.role !== "admin") {
-        throw new ErrorResponse("Unauthorized, only admins can create users", 401);
+        throw new ErrorResponse("Unauthorized, only admins can create users", 403);
     }
 
     const {firstName, lastName, email, password, role} = req.body;
@@ -84,7 +84,7 @@ export const getUserById = asyncHandler(async (req, res) => {
 export const updateUser = asyncHandler(async (req, res) => {
 
     if (req.user.role !== "admin") {
-        throw new ErrorResponse("Unauthorized, only admins can update users", 401);
+        throw new ErrorResponse("Unauthorized, only admins can update users", 403);
     }
 
     const {id} = req.params;
@@ -120,7 +120,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 export const deleteUser = asyncHandler(async (req, res) => {
     
     if (req.user.role !== "admin") {
-        throw new ErrorResponse("Unauthorized, only admins can delete users", 401);
+        throw new ErrorResponse("Unauthorized, only admins can delete users", 403);
     }
 
     const {id} = req.params;
@@ -129,8 +129,6 @@ export const deleteUser = asyncHandler(async (req, res) => {
     if (!deletedUser) {
         throw new ErrorResponse("User not found", 404);
     }
-
-    await User.findByIdAndDelete(id);
 
     res.status(200).json({
         status: "success",
@@ -159,13 +157,18 @@ export const loginUser = asyncHandler(async (req, res) => {
         role: foundUser.role,
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: "1h"});
+    const expiresIn = process.env.JWT_EXPIRES_IN || "1h";
 
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
+
+    const userResponse = foundUser.toObject();
+    delete userResponse.password;
+    
     res.status(200).json({
         status: "success",
         message: "User logged in successfully",
         token,
-        user: payload,
+        user: userResponse,
     });
 });
 

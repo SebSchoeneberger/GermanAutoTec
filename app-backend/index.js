@@ -6,6 +6,7 @@ import sparePartsRouter from "./routes/sparePartsRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import pointsRouter from "./routes/pointsRoutes.js";
 import pointRequestRouter from "./routes/pointRequestRoutes.js";
+import timeRouter from "./routes/timeRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.use("/spare-parts", sparePartsRouter);
 app.use("/users", userRouter);
 app.use("/points", pointsRouter);
 app.use("/point-requests", pointRequestRouter);
+app.use("/time", timeRouter);
 app.use('*', (req, res) => {
     res.status(404).json({
         success: false,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getActivity } from '../services/sparePartsApi';
-import { ACTIVITY_STYLES } from '../utils/sparePartsUtils';
+import { getActivity } from '../../services/sparePartsApi';
+import { ACTIVITY_STYLES } from '../../utils/sparePartsUtils';
 
 const DEFAULT_LIMIT = 20;
 

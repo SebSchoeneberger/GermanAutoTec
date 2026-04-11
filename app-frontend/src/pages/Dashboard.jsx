@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import CreateUserModal from '../components/CreateUserModal';
 import DashboardCard from '../components/DashboardCard';
+import { canAccessMyTime, canAccessTeamTime, getTimeHomePath } from '../utils/timeAccess';
 
 const UsersIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
@@ -34,6 +35,12 @@ const ActivityIcon = () => (
   </svg>
 );
 
+const TimeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -57,6 +64,18 @@ const AdminDashboard = () => {
             icon={<ActivityIcon />}
             description="Track all inventory changes and actions."
             onClick={() => navigate('/spare-parts/activity')}
+          />
+        )}
+        {(canAccessTeamTime(user?.role) || canAccessMyTime(user?.role)) && (
+          <DashboardCard
+            title="Time Management"
+            icon={<TimeIcon />}
+            description={
+              canAccessTeamTime(user?.role)
+                ? 'See who is currently checked in and open employee time details.'
+                : 'See your current status and today\'s check-in / check-out timeline.'
+            }
+            onClick={() => navigate(getTimeHomePath(user?.role))}
           />
         )}
       </div>

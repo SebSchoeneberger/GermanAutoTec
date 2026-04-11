@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { signIn } from '../services/userApi';
 import { AuthContext } from '../context/AuthContext';
@@ -20,6 +20,7 @@ const FieldError = ({ msg }) =>
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -35,7 +36,14 @@ const Login = () => {
       if (res.status === 'success') {
         login(res.user, res.token);
         toast.success('Successfully signed in.');
-        navigate('/dashboard');
+        const from = location.state?.from;
+        if (from && typeof from === 'string') {
+          navigate(from);
+        } else if (res.user?.role === 'workshop') {
+          navigate('/time/display');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         toast.error(res.message || 'Sign in failed');
       }

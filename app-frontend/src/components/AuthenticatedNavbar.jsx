@@ -2,17 +2,37 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
+import {
+  canAccessMyTime,
+  canAccessTeamTime,
+  canAccessTimeDisplay,
+  getTimeHomePath,
+} from '../utils/timeAccess';
 
-const navItems = [
-  { to: '/',             label: 'Home' },
-  { to: '/dashboard',    label: 'Dashboard' },
-  { to: '/spare-parts',  label: 'Inventory' },
-  { to: '/profile',      label: 'Profile' },
-];
+function buildNavItems(role) {
+  const items = [
+    { to: '/', label: 'Home' },
+  ];
+  if (role !== 'workshop') {
+    items.push({ to: '/dashboard', label: 'Dashboard' });
+    items.push({ to: '/spare-parts', label: 'Inventory' });
+  }
+  if (canAccessTeamTime(role) || canAccessMyTime(role)) {
+    items.push({ to: getTimeHomePath(role), label: 'Time Management' });
+  }
+  if (canAccessTimeDisplay(role)) {
+    items.push({ to: '/time/display', label: 'Clock QR' });
+  }
+  items.push({ to: '/profile', label: 'Profile' });
+  return items;
+}
 
 const AuthenticatedNavbar = () => {
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
+  const role = user?.role;
+  const navItems = buildNavItems(role);
+  const showPunchAction = canAccessMyTime(role);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const linkClass = (to) => {
@@ -45,6 +65,14 @@ const AuthenticatedNavbar = () => {
                 {item.label}
               </Link>
             ))}
+            {showPunchAction && (
+              <Link
+                to="/time/punch"
+                className="text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] transition px-3 py-1.5 rounded-lg"
+              >
+                Check in/out
+              </Link>
+            )}
             <ThemeToggle />
             <button
               type="button"
@@ -91,6 +119,15 @@ const AuthenticatedNavbar = () => {
                 {item.label}
               </Link>
             ))}
+            {showPunchAction && (
+              <Link
+                to="/time/punch"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] transition"
+              >
+                Check in/out
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => { setMenuOpen(false); logout(); }}

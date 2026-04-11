@@ -9,4 +9,27 @@ export const loginLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false
-}); 
+});
+
+/** Limits brute force on QR / punch endpoint (per IP). */
+export const timePunchLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    message: {
+        status: 'error',
+        message: 'Too many check-in attempts. Wait a minute and try again.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+export const timeCorrectionCreateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 15,
+    message: {
+        status: 'error',
+        message: 'Too many correction requests. Wait a minute and try again.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});

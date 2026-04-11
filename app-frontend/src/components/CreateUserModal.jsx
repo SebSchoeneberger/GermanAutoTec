@@ -103,6 +103,7 @@ const CreateUserModal = ({ isOpen, onClose }) => {
               <option value="accountant">Accountant</option>
               <option value="mechanic">Mechanic</option>
               <option value="receptionist">Receptionist</option>
+              <option value="workshop">Workshop display (QR tablet only)</option>
             </select>
           </div>
           <button

@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterProvider } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
@@ -9,6 +9,12 @@ import { ThemeProvider } from './context/ThemeContext';
 import Dashboard from './pages/Dashboard';
 import SpareParts from './pages/SpareParts';
 import ActivityPage from './pages/ActivityPage';
+import TimeHome from './pages/time/TimeHome';
+import TimeDisplay from './pages/time/TimeDisplay';
+import TimePunch from './pages/time/TimePunch';
+import TimeTeam from './pages/time/TimeTeam';
+import TimeEmployeeProfile from './pages/time/TimeEmployeeProfile';
+import TimeMy from './pages/time/TimeMy';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,6 +27,14 @@ const router = createBrowserRouter(
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="spare-parts" element={<SpareParts />} />
         <Route path="spare-parts/activity" element={<ActivityPage />} />
+        <Route path="time" element={<Outlet />}>
+          <Route index element={<TimeHome />} />
+          <Route path="display" element={<TimeDisplay />} />
+          <Route path="punch" element={<TimePunch />} />
+          <Route path="team" element={<TimeTeam />} />
+          <Route path="team/:employeeId" element={<TimeEmployeeProfile />} />
+          <Route path="my" element={<TimeMy />} />
+        </Route>
       </Route>
     </Route>,
   ),

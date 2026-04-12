@@ -223,7 +223,7 @@ const TimeTeam = () => {
         toast.success('Leave rejected');
       }
       setLeaveReviewModal(null);
-      await Promise.all([loadPendingLeaves(), load(true)]);
+      await load(true);
     } catch (e) {
       toast.error(e.response?.data?.error || e.response?.data?.message || `${action === 'approve' ? 'Approve' : 'Reject'} failed`);
     } finally {

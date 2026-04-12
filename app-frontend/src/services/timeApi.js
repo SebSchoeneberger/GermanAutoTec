@@ -108,3 +108,61 @@ export async function fetchEmployeeProfile(employeeId) {
   const { data } = await axios.get(`${API_URL}/time/employees/${employeeId}/profile`, { headers: authHeaders() });
   return data.data;
 }
+
+/** Fetch holidays; optional { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' } filter. */
+export async function fetchHolidays({ from, to } = {}) {
+  const params = {};
+  if (from) params.from = from;
+  if (to) params.to = to;
+  const { data } = await axios.get(`${API_URL}/time/holidays`, { headers: authHeaders(), params });
+  return data.data;
+}
+
+/** Create a holiday (manager/admin). Body: { date: 'YYYY-MM-DD', reason?: string } */
+export async function createHoliday(body) {
+  const { data } = await axios.post(`${API_URL}/time/holidays`, body, { headers: authHeaders() });
+  return data.data;
+}
+
+/** Delete a holiday by id (manager/admin). */
+export async function deleteHoliday(id) {
+  await axios.delete(`${API_URL}/time/holidays/${id}`, { headers: authHeaders() });
+}
+
+/** Submit a leave request (sick day or day off) for the current employee. */
+export async function createLeaveRequest(body) {
+  const { data } = await axios.post(`${API_URL}/time/leave`, body, { headers: authHeaders() });
+  return data.data;
+}
+
+/** Fetch the current employee's own leave requests. */
+export async function fetchMyLeaveRequests() {
+  const { data } = await axios.get(`${API_URL}/time/leave/mine`, { headers: authHeaders() });
+  return data.data;
+}
+
+/** Fetch all pending leave requests (manager/admin). */
+export async function fetchPendingLeaveRequests() {
+  const { data } = await axios.get(`${API_URL}/time/leave/pending`, { headers: authHeaders() });
+  return data.data;
+}
+
+/** Approve a leave request by id (manager/admin). */
+export async function approveLeaveRequest(id, reviewNote) {
+  const { data } = await axios.patch(
+    `${API_URL}/time/leave/${id}/approve`,
+    reviewNote != null ? { reviewNote } : {},
+    { headers: authHeaders() },
+  );
+  return data.data;
+}
+
+/** Reject a leave request by id (manager/admin). */
+export async function rejectLeaveRequest(id, reviewNote) {
+  const { data } = await axios.patch(
+    `${API_URL}/time/leave/${id}/reject`,
+    reviewNote != null ? { reviewNote } : {},
+    { headers: authHeaders() },
+  );
+  return data.data;
+}

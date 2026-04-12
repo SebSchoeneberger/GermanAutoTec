@@ -15,6 +15,7 @@ import TimePunch from './pages/time/TimePunch';
 import TimeTeam from './pages/time/TimeTeam';
 import TimeEmployeeProfile from './pages/time/TimeEmployeeProfile';
 import TimeMy from './pages/time/TimeMy';
+import TimeHolidays from './pages/time/TimeHolidays';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
           <Route path="punch" element={<TimePunch />} />
           <Route path="team" element={<TimeTeam />} />
           <Route path="team/:employeeId" element={<TimeEmployeeProfile />} />
+          <Route path="holidays" element={<TimeHolidays />} />
           <Route path="my" element={<TimeMy />} />
         </Route>
       </Route>

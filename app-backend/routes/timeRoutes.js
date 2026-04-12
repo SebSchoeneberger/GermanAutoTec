@@ -25,6 +25,18 @@ import {
   approveTimeCorrectionRequest,
   rejectTimeCorrectionRequest,
 } from "../controllers/timeCorrectionController.js";
+import {
+  createHoliday,
+  getHolidays,
+  deleteHoliday,
+} from "../controllers/holidayController.js";
+import {
+  createLeaveRequest,
+  getMyLeaveRequests,
+  getPendingLeaveRequests,
+  approveLeaveRequest,
+  rejectLeaveRequest,
+} from "../controllers/leaveController.js";
 import verifyToken from "../middleware/verifyToken.js";
 import authorize from "../middleware/authorize.js";
 import { timePunchLimiter, timeCorrectionCreateLimiter } from "../middleware/rateLimiter.js";
@@ -66,5 +78,17 @@ timeRouter.get("/employees/:employeeId/profile", authorize(TIME_ADMIN_ROLES), ge
 /** Admin punch management */
 timeRouter.post("/admin/punches", authorize(TIME_ADMIN_ROLES), createAdminPunch);
 timeRouter.delete("/admin/punches/:id", authorize(TIME_ADMIN_ROLES), deleteAdminPunch);
+
+/** Holiday management */
+timeRouter.get("/holidays", authorize([...PUNCH_ROLES, ...TIME_ADMIN_ROLES]), getHolidays);
+timeRouter.post("/holidays", authorize(TIME_ADMIN_ROLES), createHoliday);
+timeRouter.delete("/holidays/:id", authorize(TIME_ADMIN_ROLES), deleteHoliday);
+
+/** Leave requests */
+timeRouter.post("/leave", authorize(PUNCH_ROLES), createLeaveRequest);
+timeRouter.get("/leave/mine", authorize(PUNCH_ROLES), getMyLeaveRequests);
+timeRouter.get("/leave/pending", authorize(TIME_ADMIN_ROLES), getPendingLeaveRequests);
+timeRouter.patch("/leave/:id/approve", authorize(TIME_ADMIN_ROLES), approveLeaveRequest);
+timeRouter.patch("/leave/:id/reject", authorize(TIME_ADMIN_ROLES), rejectLeaveRequest);
 
 export default timeRouter;

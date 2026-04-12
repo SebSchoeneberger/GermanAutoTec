@@ -365,8 +365,8 @@ const TimeTeam = () => {
               <div className="divide-y divide-gray-100 dark:divide-white/5">
                 {[...employees].sort((a, b) => {
                   // anomalies first, then checked_in, then rest
-                  const aScore = a.todayAnomalies?.length ? 2 : a.todayStatus === 'checked_in' ? 0 : 1;
-                  const bScore = b.todayAnomalies?.length ? 2 : b.todayStatus === 'checked_in' ? 0 : 1;
+                  const aScore = a.todayAnomalies?.length ? 0 : a.todayStatus === 'checked_in' ? 1 : 2;
+                  const bScore = b.todayAnomalies?.length ? 0 : b.todayStatus === 'checked_in' ? 1 : 2;
                   return aScore - bScore;
                 }).map((emp) => {
                   const isIn = emp.todayStatus === 'checked_in';

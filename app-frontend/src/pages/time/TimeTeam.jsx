@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { EthDateTime } from 'ethiopian-calendar-date-converter';
 import { toast } from 'react-toastify';
 import { ResponsiveContainer, CartesianGrid, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts';
 import { useAuth } from '../../hooks/useAuth';
@@ -14,6 +15,10 @@ import {
   fetchPendingLeaveRequests,
   approveLeaveRequest,
   rejectLeaveRequest,
+  fetchHolidays,
+  createHoliday,
+  deleteHoliday,
+  adminCreateLeaveRecord,
 } from '../../services/timeApi';
 import { canAccessTeamTime } from '../../utils/timeAccess';
 import {
@@ -25,6 +30,49 @@ import {
   ETH_MONTHS,
   toEthDatePartsFromGregorian,
 } from '../../utils/timeFormat';
+
+function isEthiopianLeapYear(year) {
+  return Number(year) % 4 === 3;
+}
+
+function maxEthDaysInMonth(year, month) {
+  if (!month) return 30;
+  if (Number(month) <= 12) return 30;
+  return isEthiopianLeapYear(year) ? 6 : 5;
+}
+
+function toGregorianStringFromEthDate(year, month, day) {
+  if (!year || !month || !day) return '';
+  try {
+    const dt = new EthDateTime(Number(year), Number(month), Number(day), 6, 0, 0);
+    const g = dt.toEuropeanDate();
+    const yyyy = g.getUTCFullYear();
+    const mm = String(g.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(g.getUTCDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  } catch {
+    return '';
+  }
+}
+
+function buildManageYearOptions() {
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const parts = toEthDatePartsFromGregorian(iso);
+  const cur = parts?.year ?? 2017;
+  const options = [];
+  for (let y = cur + 2; y >= cur - 3; y -= 1) options.push(y);
+  return { options, current: cur };
+}
+
+const { options: MANAGE_YEAR_OPTIONS, current: CURRENT_ETH_YEAR } = buildManageYearOptions();
+
+function formatEthDateLabel(gregDateStr) {
+  const parts = toEthDatePartsFromGregorian(gregDateStr);
+  if (!parts) return '';
+  const monthName = ETH_MONTHS.find((m) => m.value === parts.month)?.label ?? '';
+  return `${parts.day} ${monthName} ${parts.year}`;
+}
 
 function anomalyLabel(code) {
   if (code === 'late_check_in') return 'Late check-in (after 09:00)';
@@ -65,6 +113,28 @@ const TimeTeam = () => {
   const [deletingPunchId, setDeletingPunchId] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showManagePunches, setShowManagePunches] = useState(false);
+
+  // Manage tab — admin leave entry
+  const [adminLeaveEmployee, setAdminLeaveEmployee] = useState('');
+  const [adminLeaveEthYear, setAdminLeaveEthYear] = useState(String(CURRENT_ETH_YEAR));
+  const [adminLeaveEthMonth, setAdminLeaveEthMonth] = useState('');
+  const [adminLeaveEthDay, setAdminLeaveEthDay] = useState('');
+  const [adminLeaveType, setAdminLeaveType] = useState('sick');
+  const [adminLeaveNote, setAdminLeaveNote] = useState('');
+  const [adminLeaveSubmitting, setAdminLeaveSubmitting] = useState(false);
+
+  // Manage tab — holidays
+  const [holidays, setHolidays] = useState([]);
+  const [holidaysLoaded, setHolidaysLoaded] = useState(false);
+  const [holidaysLoading, setHolidaysLoading] = useState(false);
+  const [holidaysError, setHolidaysError] = useState(false);
+  const [showAddHoliday, setShowAddHoliday] = useState(false);
+  const [deletingHolidayId, setDeletingHolidayId] = useState(null);
+  const [holEthYear, setHolEthYear] = useState(String(CURRENT_ETH_YEAR));
+  const [holEthMonth, setHolEthMonth] = useState('');
+  const [holEthDay, setHolEthDay] = useState('');
+  const [holReason, setHolReason] = useState('');
+  const [holSubmitting, setHolSubmitting] = useState(false);
 
   useEffect(() => {
     if (user && !canAccessTeamTime(user.role)) {
@@ -116,6 +186,12 @@ const TimeTeam = () => {
     load();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'manage' && !holidaysLoaded && !holidaysLoading) {
+      loadHolidays();
+    }
+  }, [activeTab]);
+
   const loadDetail = async (employeeId, year, month) => {
     if (!employeeId) { setDetail(null); return; }
     try {
@@ -139,6 +215,79 @@ const TimeTeam = () => {
   useEffect(() => {
     if (selected?.employeeId) loadDetail(selected.employeeId, detailYear, detailMonth);
   }, [detailYear, detailMonth]);
+
+  const loadHolidays = async () => {
+    try {
+      setHolidaysLoading(true);
+      setHolidaysError(false);
+      const data = await fetchHolidays();
+      setHolidays(data);
+      setHolidaysLoaded(true);
+    } catch {
+      setHolidaysError(true);
+      toast.error('Failed to load holidays');
+    } finally {
+      setHolidaysLoading(false);
+    }
+  };
+
+  const handleCreateHoliday = async (e) => {
+    e.preventDefault();
+    const gregDate = toGregorianStringFromEthDate(holEthYear, holEthMonth, holEthDay);
+    if (!gregDate) { toast.error('Select a valid date'); return; }
+    try {
+      setHolSubmitting(true);
+      const created = await createHoliday({ date: gregDate, reason: holReason.trim() });
+      setHolidays((prev) => [...prev, created].sort((a, b) => a.date.localeCompare(b.date)));
+      toast.success('Holiday added');
+      setHolEthMonth('');
+      setHolEthDay('');
+      setHolReason('');
+      setShowAddHoliday(false);
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Failed to add holiday');
+    } finally {
+      setHolSubmitting(false);
+    }
+  };
+
+  const handleDeleteHoliday = async (id) => {
+    try {
+      setDeletingHolidayId(id);
+      await deleteHoliday(id);
+      setHolidays((prev) => prev.filter((h) => h.id !== id));
+      toast.success('Holiday removed');
+    } catch {
+      toast.error('Failed to remove holiday');
+    } finally {
+      setDeletingHolidayId(null);
+    }
+  };
+
+  const handleAdminLeave = async (e) => {
+    e.preventDefault();
+    const gregDate = toGregorianStringFromEthDate(adminLeaveEthYear, adminLeaveEthMonth, adminLeaveEthDay);
+    if (!gregDate) { toast.error('Select a valid date'); return; }
+    if (!adminLeaveEmployee) { toast.error('Select an employee'); return; }
+    try {
+      setAdminLeaveSubmitting(true);
+      await adminCreateLeaveRecord({
+        employeeId: adminLeaveEmployee,
+        date: gregDate,
+        type: adminLeaveType,
+        note: adminLeaveNote.trim(),
+      });
+      toast.success('Leave record added');
+      setAdminLeaveEthMonth('');
+      setAdminLeaveEthDay('');
+      setAdminLeaveType('sick');
+      setAdminLeaveNote('');
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Failed to add leave record');
+    } finally {
+      setAdminLeaveSubmitting(false);
+    }
+  };
 
   if (!canAccessTeamTime(user?.role)) return null;
 
@@ -269,6 +418,16 @@ const TimeTeam = () => {
         </svg>
       ),
     },
+    {
+      id: 'manage',
+      label: 'Manage',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -282,15 +441,6 @@ const TimeTeam = () => {
           ) : null}
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            to="/time/holidays"
-            className="p-2 rounded-xl border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition"
-            aria-label="Holidays"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </Link>
           <button
             type="button"
             onClick={() => load(true)}
@@ -745,6 +895,299 @@ const TimeTeam = () => {
               );
             })}
           </ul>
+        );
+      })()}
+
+      {/* ── MANAGE TAB ── */}
+      {activeTab === 'manage' && (() => {
+        const adminLeaveDayOptions = Array.from({ length: maxEthDaysInMonth(adminLeaveEthYear, adminLeaveEthMonth) }, (_, i) => i + 1);
+        const adminLeaveGregDate = toGregorianStringFromEthDate(adminLeaveEthYear, adminLeaveEthMonth, adminLeaveEthDay);
+        const holDayOptions = Array.from({ length: maxEthDaysInMonth(holEthYear, holEthMonth) }, (_, i) => i + 1);
+        const holGregDate = toGregorianStringFromEthDate(holEthYear, holEthMonth, holEthDay);
+
+        const selectClass = 'rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-dark/40 dark:focus:ring-white/20';
+
+        return (
+          <div className="space-y-5 pb-8">
+            {/* ── Mark Leave ── */}
+            <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#141518] shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Mark Leave</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Directly mark an employee sick or day off — no request needed.</p>
+              </div>
+              <form onSubmit={handleAdminLeave} className="px-4 py-4 space-y-3">
+                {/* Employee */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Employee</label>
+                  <select
+                    required
+                    value={adminLeaveEmployee}
+                    onChange={(e) => setAdminLeaveEmployee(e.target.value)}
+                    className={`w-full ${selectClass}`}
+                  >
+                    <option value="">Select employee…</option>
+                    {[...employees].sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)).map((emp) => (
+                      <option key={emp.employeeId} value={emp.employeeId}>
+                        {emp.firstName} {emp.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Date (Ethiopian calendar)</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      required
+                      value={adminLeaveEthYear}
+                      onChange={(e) => {
+                        const y = e.target.value;
+                        setAdminLeaveEthYear(y);
+                        if (adminLeaveEthDay) setAdminLeaveEthDay(String(Math.min(Number(adminLeaveEthDay), maxEthDaysInMonth(y, adminLeaveEthMonth))));
+                      }}
+                      className={selectClass}
+                    >
+                      {MANAGE_YEAR_OPTIONS.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                    <select
+                      required
+                      value={adminLeaveEthMonth}
+                      onChange={(e) => {
+                        const m = e.target.value;
+                        setAdminLeaveEthMonth(m);
+                        if (adminLeaveEthDay) setAdminLeaveEthDay(String(Math.min(Number(adminLeaveEthDay), maxEthDaysInMonth(adminLeaveEthYear, m))));
+                      }}
+                      className={selectClass}
+                    >
+                      <option value="">Month</option>
+                      {ETH_MONTHS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+                    </select>
+                    <select
+                      required
+                      value={adminLeaveEthDay}
+                      onChange={(e) => setAdminLeaveEthDay(e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="">Day</option>
+                      {adminLeaveDayOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  {adminLeaveGregDate && (
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {formatWorkDateWeekday(adminLeaveGregDate)} · {formatWorkDateGregorianSmall(adminLeaveGregDate)} (Gregorian)
+                    </p>
+                  )}
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Type</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[{ value: 'sick', label: 'Sick day' }, { value: 'day_off', label: 'Day off' }].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setAdminLeaveType(opt.value)}
+                        className={`py-2 rounded-xl text-xs font-semibold border transition ${
+                          adminLeaveType === opt.value
+                            ? 'bg-brand-dark text-white border-brand-dark'
+                            : 'border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Note */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                    Note <span className="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={adminLeaveNote}
+                    onChange={(e) => setAdminLeaveNote(e.target.value)}
+                    placeholder="e.g. Doctor confirmed"
+                    maxLength={500}
+                    className={`w-full ${selectClass}`}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={adminLeaveSubmitting || !adminLeaveEmployee || !adminLeaveGregDate}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] disabled:opacity-50 transition"
+                >
+                  {adminLeaveSubmitting ? 'Saving…' : 'Mark leave'}
+                </button>
+              </form>
+            </div>
+
+            {/* ── Holidays ── */}
+            <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#141518] shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Holidays</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Excluded from expected-work calculations.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddHoliday((v) => !v)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                      showAddHoliday
+                        ? 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200'
+                        : 'text-white bg-brand-dark hover:bg-[#2a3640]'
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      {showAddHoliday
+                        ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        : <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      }
+                    </svg>
+                    {showAddHoliday ? 'Cancel' : 'Add Holiday'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Add holiday form */}
+              {showAddHoliday && (
+                <form onSubmit={handleCreateHoliday} className="px-4 py-4 space-y-3 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Date (Ethiopian calendar)</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <select
+                        required
+                        value={holEthYear}
+                        onChange={(e) => {
+                          const y = e.target.value;
+                          setHolEthYear(y);
+                          if (holEthDay) setHolEthDay(String(Math.min(Number(holEthDay), maxEthDaysInMonth(y, holEthMonth))));
+                        }}
+                        className={selectClass}
+                      >
+                        {MANAGE_YEAR_OPTIONS.map((y) => <option key={y} value={y}>{y}</option>)}
+                      </select>
+                      <select
+                        required
+                        value={holEthMonth}
+                        onChange={(e) => {
+                          const m = e.target.value;
+                          setHolEthMonth(m);
+                          if (holEthDay) setHolEthDay(String(Math.min(Number(holEthDay), maxEthDaysInMonth(holEthYear, m))));
+                        }}
+                        className={selectClass}
+                      >
+                        <option value="">Month</option>
+                        {ETH_MONTHS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+                      </select>
+                      <select
+                        required
+                        value={holEthDay}
+                        onChange={(e) => setHolEthDay(e.target.value)}
+                        className={selectClass}
+                      >
+                        <option value="">Day</option>
+                        {holDayOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    {holGregDate && (
+                      <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {formatWorkDateWeekday(holGregDate)} · {formatWorkDateGregorianSmall(holGregDate)} (Gregorian)
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                      Reason <span className="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={holReason}
+                      onChange={(e) => setHolReason(e.target.value)}
+                      placeholder="e.g. Ethiopian New Year"
+                      maxLength={200}
+                      className={`w-full ${selectClass}`}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={holSubmitting || !holGregDate}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] disabled:opacity-50 transition"
+                  >
+                    {holSubmitting ? 'Adding…' : 'Add Holiday'}
+                  </button>
+                </form>
+              )}
+
+              {/* Holiday list */}
+              {holidaysLoading ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 p-4 text-center">Loading…</p>
+              ) : holidaysError ? (
+                <div className="py-10 px-4 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mx-auto mb-2 text-red-400 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Failed to load holidays</p>
+                  <button
+                    type="button"
+                    onClick={loadHolidays}
+                    className="mt-2 text-xs text-brand-dark dark:text-brand-light underline hover:no-underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : holidaysLoaded && holidays.length === 0 ? (
+                <div className="py-10 px-4 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No holidays yet</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Add holidays to exclude them from time tracking.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
+                  {holidays.map((h) => (
+                    <div key={h.id} className="flex items-center gap-3 px-4 py-3.5">
+                      <span className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-violet-100 dark:bg-violet-900/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-violet-600 dark:text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEthDateLabel(h.date)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {formatWorkDateWeekday(h.date)} · {formatWorkDateGregorianSmall(h.date)}
+                        </p>
+                        {h.reason && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate italic">{h.reason}</p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteHoliday(h.id)}
+                        disabled={deletingHolidayId === h.id}
+                        aria-label="Remove holiday"
+                        className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-40 transition flex-shrink-0"
+                      >
+                        {deletingHolidayId === h.id ? (
+                          <span className="text-[10px]">…</span>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         );
       })()}
 

@@ -1,9 +1,11 @@
 import { DateTime } from "luxon";
 import LeaveRequest from "../models/LeaveRequest.js";
+import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ErrorResponse from "../utils/errorResponse.js";
 import { isValidWorkDateString, ADDIS_TZ } from "../utils/addisTime.js";
 import { toEthiopianNumericDateStringFromGregorianDate } from "../utils/ethiopianDate.js";
+import { PUNCH_ROLES } from "./timeController.js";
 
 /** Past 3 days + today + future are all valid for leave requests. */
 const LEAVE_LOOKBACK_DAYS = 3;
@@ -24,6 +26,7 @@ function mapLeave(r) {
     type: r.type,
     note: r.note,
     status: r.status,
+    source: r.source || "employee",
     reviewedBy: r.reviewedBy,
     reviewNote: r.reviewNote,
     reviewedAt: r.reviewedAt,
@@ -120,4 +123,41 @@ export const rejectLeaveRequest = asyncHandler(async (req, res) => {
   await request.save();
 
   res.status(200).json({ status: "success", message: "Leave rejected", data: mapLeave(request) });
+});
+
+/** POST /time/leave/admin — admin/manager directly marks an employee sick or day off. */
+export const adminCreateLeaveRecord = asyncHandler(async (req, res) => {
+  const { employeeId, date, type, note } = req.body || {};
+
+  if (!employeeId) throw new ErrorResponse("employeeId is required", 400);
+  if (!isValidWorkDateString(date)) throw new ErrorResponse("date must be YYYY-MM-DD", 400);
+  if (!["sick", "day_off"].includes(type)) throw new ErrorResponse("type must be sick or day_off", 400);
+
+  const employee = await User.findById(employeeId).select("role").lean();
+  if (!employee) throw new ErrorResponse("Employee not found", 404);
+  if (!PUNCH_ROLES.includes(employee.role)) throw new ErrorResponse("Employee is not in a trackable role", 400);
+
+  // Block if a non-rejected leave already exists for this employee on this date
+  const existing = await LeaveRequest.findOne({ employee: employeeId, date, status: { $ne: "rejected" } }).lean();
+  if (existing) {
+    const label = existing.status === "pending" ? "pending request" : "approved record";
+    throw new ErrorResponse(`A ${label} already exists for this employee on ${date}`, 409);
+  }
+
+  const leave = await LeaveRequest.create({
+    employee: employeeId,
+    date,
+    type,
+    note: typeof note === "string" ? note.trim() : "",
+    status: "approved",
+    source: "admin",
+    reviewedBy: req.user.id,
+    reviewedAt: new Date(),
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Leave record created",
+    data: mapLeave(leave),
+  });
 });

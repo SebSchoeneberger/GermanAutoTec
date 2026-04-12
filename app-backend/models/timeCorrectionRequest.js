@@ -69,8 +69,10 @@ const timeCorrectionRequestSchema = new Schema({
 },
 { timestamps: true });
 
+// One pending correction per employee per (workDate + punchType), so employees can
+// submit a missing check-in and a missing check-out for the same day simultaneously.
 timeCorrectionRequestSchema.index(
-  { employee: 1, workDate: 1 },
+  { employee: 1, workDate: 1, punchType: 1 },
   { unique: true, partialFilterExpression: { status: "pending" } },
 );
 

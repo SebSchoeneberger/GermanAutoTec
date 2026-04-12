@@ -166,3 +166,9 @@ export async function rejectLeaveRequest(id, reviewNote) {
   );
   return data.data;
 }
+
+/** Admin direct leave entry — marks an employee as sick or day off without a request flow. */
+export async function adminCreateLeaveRecord(body) {
+  const { data } = await axios.post(`${API_URL}/time/leave/admin`, body, { headers: authHeaders() });
+  return data.data;
+}

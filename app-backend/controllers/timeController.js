@@ -795,6 +795,18 @@ export const createAdminPunch = asyncHandler(async (req, res) => {
     throw new ErrorResponse("time must be HH:mm in 24-hour format (Addis timezone)", 400);
   }
 
+  const { start: dayStart, end: dayEnd } = addisWorkDateToUtcRange(workDate);
+  const existingPunches = await TimePunch.find({
+    employee: employeeId,
+    at: { $gte: dayStart, $lte: dayEnd },
+  }).sort({ at: 1 }).lean();
+
+  // Simulate inserting the new punch in chronological order and validate the sequence.
+  const simulated = [...existingPunches, { type, at }].sort((a, b) => new Date(a.at) - new Date(b.at));
+  if (hasInvalidAlternatingSequence(simulated)) {
+    throw new ErrorResponse("This punch would create an invalid in/out sequence for that day.", 409);
+  }
+
   const punch = await TimePunch.create({
     employee: employeeId,
     type,

@@ -1,6 +1,8 @@
 import TimePunch from "../models/timePunch.js";
 import TimeCorrectionRequest from "../models/timeCorrectionRequest.js";
 import User from "../models/User.js";
+import Holiday from "../models/Holiday.js";
+import LeaveRequest from "../models/LeaveRequest.js";
 import { DateTime } from "luxon";
 import asyncHandler from "../utils/asyncHandler.js";
 import ErrorResponse from "../utils/errorResponse.js";
@@ -113,9 +115,11 @@ function getExpectedMinutesForWorkDate(workDate) {
   return 0;
 }
 
-function buildDayBalance(workDate, dayPunches, nowAddis) {
+function buildDayBalance(workDate, dayPunches, nowAddis, holidayDates = new Set(), leaveDates = new Set()) {
+  const isHoliday = holidayDates.has(workDate);
+  const isOnLeave = leaveDates.has(workDate);
   const summary = summarizePunchesForDay(dayPunches, { workDate, nowAddis });
-  const expectedMinutes = getExpectedMinutesForWorkDate(workDate);
+  const expectedMinutes = (isHoliday || isOnLeave) ? 0 : getExpectedMinutesForWorkDate(workDate);
   const overtimeMinutes = Math.max(0, summary.totalMinutes - expectedMinutes);
   const lostMinutes = Math.max(0, expectedMinutes - summary.totalMinutes);
   return {
@@ -124,6 +128,8 @@ function buildDayBalance(workDate, dayPunches, nowAddis) {
     overtimeMinutes,
     lostMinutes,
     isOffDay: expectedMinutes === 0,
+    isHoliday,
+    isOnLeave,
   };
 }
 
@@ -132,8 +138,8 @@ function buildTodayStatusFromPunches(punches) {
   return !lastPunch ? "none" : lastPunch.type === "in" ? "checked_in" : "checked_out";
 }
 
-function mapDaySummaryRow(workDate, dayPunches, nowAddis) {
-  const dayBalance = buildDayBalance(workDate, dayPunches, nowAddis);
+function mapDaySummaryRow(workDate, dayPunches, nowAddis, holidayDates = new Set(), leaveDates = new Set()) {
+  const dayBalance = buildDayBalance(workDate, dayPunches, nowAddis, holidayDates, leaveDates);
   const { summary } = dayBalance;
   return {
     workDate,
@@ -143,6 +149,8 @@ function mapDaySummaryRow(workDate, dayPunches, nowAddis) {
     overtimeMinutes: dayBalance.overtimeMinutes,
     lostMinutes: dayBalance.lostMinutes,
     isOffDay: dayBalance.isOffDay,
+    isHoliday: dayBalance.isHoliday,
+    isOnLeave: dayBalance.isOnLeave,
     firstInAt: summary.firstInAt ? new Date(summary.firstInAt).toISOString() : null,
     lastOutAt: summary.lastOutAt ? new Date(summary.lastOutAt).toISOString() : null,
     anomalies: summary.anomalies,
@@ -165,6 +173,39 @@ async function getLatestPunchMapForDay(dayStart, dayEnd) {
     }
   }
   return latestByEmployee;
+}
+
+/**
+ * Loads all holidays in [fromDate, toDate] (inclusive, YYYY-MM-DD) and returns a Set
+ * of date strings for O(1) lookups during day iteration.
+ * @param {string} fromDate - YYYY-MM-DD
+ * @param {string} toDate   - YYYY-MM-DD
+ * @returns {Promise<Set<string>>}
+ */
+async function fetchHolidaySet(fromDate, toDate) {
+  const holidays = await Holiday.find({ date: { $gte: fromDate, $lte: toDate } })
+    .select("date")
+    .lean();
+  return new Set(holidays.map((h) => h.date));
+}
+
+/**
+ * Loads approved leave dates for a specific employee in [fromDate, toDate] and returns a Set
+ * of date strings for O(1) lookups during day iteration.
+ * @param {string|import('mongoose').Types.ObjectId} employeeId
+ * @param {string} fromDate - YYYY-MM-DD
+ * @param {string} toDate   - YYYY-MM-DD
+ * @returns {Promise<Set<string>>}
+ */
+async function fetchApprovedLeaveSet(employeeId, fromDate, toDate) {
+  const leaves = await LeaveRequest.find({
+    employee: employeeId,
+    date: { $gte: fromDate, $lte: toDate },
+    status: "approved",
+  })
+    .select("date")
+    .lean();
+  return new Set(leaves.map((l) => l.date));
 }
 
 /**
@@ -430,14 +471,14 @@ function groupPunchesByAddisWorkDate(punches) {
  * @param {number} dayCount - how many days to iterate (nowAddis.day for current month, daysInMonth for historical).
  * @param {DateTime} nowAddis - current real time in Addis (for anomaly context in summarizePunchesForDay).
  */
-function accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis) {
+function accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis, holidayDates = new Set(), leaveDates = new Set()) {
   let totalMinutes = 0;
   let expectedMinutes = 0;
   let overtimeMinutes = 0;
   let lostMinutes = 0;
   for (let day = 1; day <= dayCount; day += 1) {
     const workDate = monthRef.set({ day }).toISODate();
-    const row = mapDaySummaryRow(workDate, byWorkDate.get(workDate) || [], nowAddis);
+    const row = mapDaySummaryRow(workDate, byWorkDate.get(workDate) || [], nowAddis, holidayDates, leaveDates);
     totalMinutes += row.totalMinutes;
     expectedMinutes += row.expectedMinutes;
     overtimeMinutes += row.overtimeMinutes;
@@ -490,10 +531,21 @@ export const getMyTimeSummary = asyncHandler(async (req, res) => {
 
   // Last 7 days: end of the viewed month for historical, today for current
   const last7DaysRef = isHistorical ? monthRef.set({ day: dayCount }) : nowAddis;
+
+  // Pre-fetch holidays and approved leaves covering both the month range and the last-7-days window
+  const last7Start = last7DaysRef.minus({ days: 6 }).toISODate();
+  const monthStart = monthRef.startOf("month").toISODate();
+  const rangeStart = last7Start < monthStart ? last7Start : monthStart;
+  const rangeEnd = last7DaysRef.toISODate();
+  const [holidayDates, leaveDates] = await Promise.all([
+    fetchHolidaySet(rangeStart, rangeEnd),
+    fetchApprovedLeaveSet(req.user.id, rangeStart, rangeEnd),
+  ]);
+
   const last7Days = [];
   for (let i = 6; i >= 0; i -= 1) {
     const day = last7DaysRef.minus({ days: i }).toISODate();
-    last7Days.push(mapDaySummaryRow(day, byWorkDate.get(day) || [], nowAddis));
+    last7Days.push(mapDaySummaryRow(day, byWorkDate.get(day) || [], nowAddis, holidayDates, leaveDates));
   }
   const weekTotalMinutes = last7Days.reduce((s, r) => s + r.totalMinutes, 0);
   const weekExpectedMinutes = last7Days.reduce((s, r) => s + r.expectedMinutes, 0);
@@ -506,7 +558,7 @@ export const getMyTimeSummary = asyncHandler(async (req, res) => {
   let cumulativeExpectedMinutes = 0;
   for (let day = 1; day <= dayCount; day += 1) {
     const d = monthRef.set({ day }).toISODate();
-    const row = mapDaySummaryRow(d, byWorkDate.get(d) || [], nowAddis);
+    const row = mapDaySummaryRow(d, byWorkDate.get(d) || [], nowAddis, holidayDates, leaveDates);
     cumulativeMinutes += row.totalMinutes;
     cumulativeExpectedMinutes += row.expectedMinutes;
     monthDays.push({
@@ -518,7 +570,7 @@ export const getMyTimeSummary = asyncHandler(async (req, res) => {
     });
   }
 
-  const monthTotals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis);
+  const monthTotals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis, holidayDates, leaveDates);
 
   res.status(200).json({
     status: "success",
@@ -563,11 +615,15 @@ export const getTeamOverview = asyncHandler(async (req, res) => {
   const workDate = nowAddis.toISODate();
   const { start: dayStart, end: dayEnd } = addisWorkDateToUtcRange(workDate);
 
-  const [allEmployees, todayPunches, pendingCorrectionsCount] = await Promise.all([
+  const [allEmployees, todayPunches, pendingCorrectionsCount, holidayDates, todayApprovedLeaves] = await Promise.all([
     User.find({ role: { $in: PUNCH_ROLES } }).select("firstName lastName role email").sort({ firstName: 1, lastName: 1 }).lean(),
     TimePunch.find({ at: { $gte: dayStart, $lt: dayEnd } }).sort({ employee: 1, at: 1 }).lean(),
     TimeCorrectionRequest.countDocuments({ status: "pending" }),
+    fetchHolidaySet(workDate, workDate),
+    LeaveRequest.find({ date: workDate, status: "approved" }).select("employee").lean(),
   ]);
+  const isTodayHoliday = holidayDates.has(workDate);
+  const todayLeaveEmployeeIds = new Set(todayApprovedLeaves.map((l) => String(l.employee)));
 
   const punchesByEmployee = new Map();
   for (const p of todayPunches) {
@@ -583,15 +639,18 @@ export const getTeamOverview = asyncHandler(async (req, res) => {
     const dayPunches = punchesByEmployee.get(String(emp._id)) || [];
     const status = buildTodayStatusFromPunches(dayPunches);
     const daySummary = summarizePunchesForDay(dayPunches, { workDate, nowAddis });
+    const isOnLeaveToday = todayLeaveEmployeeIds.has(String(emp._id));
+    const todayAnomalies = (isTodayHoliday || isOnLeaveToday) ? [] : daySummary.anomalies;
     if (status === "checked_in") checkedInCount += 1;
-    if (daySummary.anomalies.length > 0) anomaliesCount += 1;
+    if (todayAnomalies.length > 0) anomaliesCount += 1;
     return {
       employeeId: emp._id,
       firstName: emp.firstName,
       lastName: emp.lastName,
       role: emp.role,
       todayStatus: status,
-      todayAnomalies: daySummary.anomalies,
+      isOnLeaveToday,
+      todayAnomalies,
       checkedInAt: status === "checked_in" ? dayPunches[dayPunches.length - 1]?.at?.toISOString?.() || null : null,
     };
   });
@@ -601,6 +660,7 @@ export const getTeamOverview = asyncHandler(async (req, res) => {
     data: {
       workDate,
       ethiopianWorkDate: toEthiopianNumericDateStringFromGregorianDate(workDate),
+      isHoliday: isTodayHoliday,
       kpis: {
         checkedInNow: checkedInCount,
         pendingCorrections: pendingCorrectionsCount,
@@ -663,14 +723,25 @@ export const getEmployeeSummary = asyncHandler(async (req, res) => {
   const todayPunches = byWorkDate.get(todayWorkDate) || [];
   const todaySummary = summarizePunchesForDay(todayPunches, { workDate: todayWorkDate, nowAddis });
 
-  const last7Days = [];
   const last7DaysRef = isHistorical ? monthRef.set({ day: dayCount }) : nowAddis;
+
+  // Pre-fetch holidays and approved leaves covering both the month range and the last-7-days window
+  const last7Start = last7DaysRef.minus({ days: 6 }).toISODate();
+  const monthStart = monthRef.startOf("month").toISODate();
+  const rangeStartEmp = last7Start < monthStart ? last7Start : monthStart;
+  const rangeEndEmp = last7DaysRef.toISODate();
+  const [holidayDates, leaveDates] = await Promise.all([
+    fetchHolidaySet(rangeStartEmp, rangeEndEmp),
+    fetchApprovedLeaveSet(employeeId, rangeStartEmp, rangeEndEmp),
+  ]);
+
+  const last7Days = [];
   for (let i = 6; i >= 0; i -= 1) {
     const day = last7DaysRef.minus({ days: i }).toISODate();
-    last7Days.push(mapDaySummaryRow(day, byWorkDate.get(day) || [], nowAddis));
+    last7Days.push(mapDaySummaryRow(day, byWorkDate.get(day) || [], nowAddis, holidayDates, leaveDates));
   }
 
-  const monthTotals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis);
+  const monthTotals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis, holidayDates, leaveDates);
 
   res.status(200).json({
     status: "success",
@@ -780,6 +851,13 @@ export const getEmployeeProfile = asyncHandler(async (req, res) => {
   }).sort({ at: 1 });
   const todaySummary = summarizePunchesForDay(todayPunches, { workDate: todayWorkDate, nowAddis });
 
+  // Pre-fetch holidays and approved leaves for the full 3-month trend window in one query
+  const trendStart = nowAddis.minus({ months: 2 }).startOf("month").toISODate();
+  const [holidayDates, leaveDates] = await Promise.all([
+    fetchHolidaySet(trendStart, todayWorkDate),
+    fetchApprovedLeaveSet(employeeId, trendStart, todayWorkDate),
+  ]);
+
   // Last 3 months (current + 2 previous), newest first
   const TREND_MONTHS = 3;
   const trend = [];
@@ -796,7 +874,7 @@ export const getEmployeeProfile = asyncHandler(async (req, res) => {
     }).sort({ at: 1 });
 
     const byWorkDate = groupPunchesByAddisWorkDate(punches);
-    const totals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis);
+    const totals = accumulateMonthTotals(monthRef, byWorkDate, dayCount, nowAddis, holidayDates, leaveDates);
 
     let daysWorked = 0;
     let daysExpected = 0;
@@ -807,7 +885,7 @@ export const getEmployeeProfile = asyncHandler(async (req, res) => {
 
     for (let d = 1; d <= dayCount; d += 1) {
       const workDate = monthRef.set({ day: d }).toISODate();
-      const row = mapDaySummaryRow(workDate, byWorkDate.get(workDate) || [], nowAddis);
+      const row = mapDaySummaryRow(workDate, byWorkDate.get(workDate) || [], nowAddis, holidayDates, leaveDates);
       days.push(row);
       if (!row.isOffDay) {
         daysExpected += 1;

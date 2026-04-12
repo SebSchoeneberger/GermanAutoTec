@@ -235,10 +235,6 @@ const TimePunch = () => {
         video: { facingMode: { ideal: 'environment' } },
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
       setIsScanning(true);
 
       scanTimerRef.current = window.setInterval(async () => {
@@ -334,6 +330,16 @@ const TimePunch = () => {
       }
     };
   }, [flow, navigate]);
+
+  // Attach the camera stream to the video element after React renders it.
+  // videoRef.current is null while isScanning is false (video not in DOM yet),
+  // so we defer the srcObject assignment until the element actually mounts.
+  useEffect(() => {
+    if (isScanning && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isScanning]);
 
   useEffect(() => () => stopScanner(), []);
 

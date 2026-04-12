@@ -1212,6 +1212,11 @@ const TimeMy = () => {
                           }`}>
                             {r._kind === 'correction' ? '⏱ Correction' : '🏥 Leave'}
                           </span>
+                          {r._kind === 'leave' && r.source === 'admin' && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-400">
+                              Added by admin
+                            </span>
+                          )}
                           <span className="text-xs text-gray-500 dark:text-gray-500">
                             {formatRelativeTime(r.createdAt || r.requestedAt)}
                           </span>

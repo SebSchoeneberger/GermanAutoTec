@@ -96,6 +96,22 @@ export const createTimeCorrectionRequest = asyncHandler(async (req, res) => {
     throw new ErrorResponse("time does not fall on the selected work date", 400);
   }
 
+  // For missing corrections, reject early if a punch of that type already exists on this day.
+  // The employee should use wrong_time instead.
+  if (kind === "missing") {
+    const conflict = await TimePunch.findOne({
+      employee: req.user.id,
+      type: punchType,
+      at: { $gte: start, $lte: end },
+    });
+    if (conflict) {
+      throw new ErrorResponse(
+        `A ${punchType === "in" ? "check-in" : "check-out"} punch already exists for this date. Use "Wrong time" to correct it instead.`,
+        400,
+      );
+    }
+  }
+
   let existingPunch = null;
   if (kind === "wrong_time") {
     if (!existingPunchId) {
@@ -139,7 +155,7 @@ export const createTimeCorrectionRequest = asyncHandler(async (req, res) => {
     });
   } catch (err) {
     if (err.code === 11000) {
-      throw new ErrorResponse("You already have a pending request for this work date.", 400);
+      throw new ErrorResponse("You already have a pending request for this punch type on this work date.", 400);
     }
     throw err;
   }
@@ -200,14 +216,30 @@ export const approveTimeCorrectionRequest = asyncHandler(async (req, res) => {
 
   try {
     if (request.kind === "missing") {
-      const punch = await TimePunch.create({
+      // Safety: if a punch of this type already exists (e.g. stale request from before the
+      // submission guard), update it in place rather than creating a duplicate.
+      const { start, end } = addisWorkDateToUtcRange(request.workDate);
+      const existing = await TimePunch.findOne({
         employee: request.employee,
         type: request.punchType,
-        at: request.requestedAt,
-        source: "correction",
-        correctionRequestId: request._id,
+        at: { $gte: start, $lte: end },
       });
-      createdPunchId = punch._id;
+      if (existing) {
+        revertPunch = { id: existing._id, at: existing.at, source: existing.source, correctionRequestId: existing.correctionRequestId };
+        existing.at = request.requestedAt;
+        existing.source = "correction";
+        existing.correctionRequestId = request._id;
+        await existing.save();
+      } else {
+        const punch = await TimePunch.create({
+          employee: request.employee,
+          type: request.punchType,
+          at: request.requestedAt,
+          source: "correction",
+          correctionRequestId: request._id,
+        });
+        createdPunchId = punch._id;
+      }
     } else {
       const punch = await TimePunch.findById(request.existingPunchId);
       if (!punch) {

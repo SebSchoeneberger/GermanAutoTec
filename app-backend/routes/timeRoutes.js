@@ -36,6 +36,7 @@ import {
   getPendingLeaveRequests,
   approveLeaveRequest,
   rejectLeaveRequest,
+  adminCreateLeaveRecord,
 } from "../controllers/leaveController.js";
 import verifyToken from "../middleware/verifyToken.js";
 import authorize from "../middleware/authorize.js";
@@ -86,6 +87,7 @@ timeRouter.delete("/holidays/:id", authorize(TIME_ADMIN_ROLES), deleteHoliday);
 
 /** Leave requests */
 timeRouter.post("/leave", authorize(PUNCH_ROLES), createLeaveRequest);
+timeRouter.post("/leave/admin", authorize(TIME_ADMIN_ROLES), adminCreateLeaveRecord);
 timeRouter.get("/leave/mine", authorize(PUNCH_ROLES), getMyLeaveRequests);
 timeRouter.get("/leave/pending", authorize(TIME_ADMIN_ROLES), getPendingLeaveRequests);
 timeRouter.patch("/leave/:id/approve", authorize(TIME_ADMIN_ROLES), approveLeaveRequest);

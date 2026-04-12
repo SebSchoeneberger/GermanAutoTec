@@ -13,6 +13,7 @@ const leaveRequestSchema = new Schema(
     type: { type: String, enum: ["sick", "day_off"], required: true },
     note: { type: String, trim: true, maxlength: 500, default: "" },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    source: { type: String, enum: ["employee", "admin"], default: "employee" },
     reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
     reviewNote: { type: String, trim: true, maxlength: 500, default: "" },
     reviewedAt: { type: Date },

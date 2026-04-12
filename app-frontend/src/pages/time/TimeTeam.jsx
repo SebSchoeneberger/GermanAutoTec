@@ -127,6 +127,7 @@ const TimeTeam = () => {
   const [holidays, setHolidays] = useState([]);
   const [holidaysLoaded, setHolidaysLoaded] = useState(false);
   const [holidaysLoading, setHolidaysLoading] = useState(false);
+  const [holidaysError, setHolidaysError] = useState(false);
   const [showAddHoliday, setShowAddHoliday] = useState(false);
   const [deletingHolidayId, setDeletingHolidayId] = useState(null);
   const [holEthYear, setHolEthYear] = useState(String(CURRENT_ETH_YEAR));
@@ -218,10 +219,12 @@ const TimeTeam = () => {
   const loadHolidays = async () => {
     try {
       setHolidaysLoading(true);
+      setHolidaysError(false);
       const data = await fetchHolidays();
       setHolidays(data);
       setHolidaysLoaded(true);
     } catch {
+      setHolidaysError(true);
       toast.error('Failed to load holidays');
     } finally {
       setHolidaysLoading(false);
@@ -1124,7 +1127,21 @@ const TimeTeam = () => {
               {/* Holiday list */}
               {holidaysLoading ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400 p-4 text-center">Loading…</p>
-              ) : holidays.length === 0 ? (
+              ) : holidaysError ? (
+                <div className="py-10 px-4 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mx-auto mb-2 text-red-400 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Failed to load holidays</p>
+                  <button
+                    type="button"
+                    onClick={loadHolidays}
+                    className="mt-2 text-xs text-brand-dark dark:text-brand-light underline hover:no-underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : holidaysLoaded && holidays.length === 0 ? (
                 <div className="py-10 px-4 text-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

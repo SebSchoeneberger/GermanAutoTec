@@ -154,7 +154,7 @@ export async function approveLeaveRequest(id, reviewNote) {
     reviewNote != null ? { reviewNote } : {},
     { headers: authHeaders() },
   );
-  return data;
+  return data.data;
 }
 
 /** Reject a leave request by id (manager/admin). */
@@ -164,5 +164,5 @@ export async function rejectLeaveRequest(id, reviewNote) {
     reviewNote != null ? { reviewNote } : {},
     { headers: authHeaders() },
   );
-  return data;
+  return data.data;
 }

@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { storeToken, getToken } from '../utils/tokenUtils';
-import axios from 'axios';
+import { getMe } from '../services/userApi';
 
 export const AuthContext = createContext();
 
@@ -13,10 +13,7 @@ export const AuthProvider = ({ children }) => {
       const token = getToken();
       if (token) {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data.data);
+          setUser(await getMe());
         } catch (error) {
           console.error('Auth initialization failed:', error);
           storeToken(null);
@@ -39,11 +36,21 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/';
   };
 
+  const refreshUser = async () => {
+    if (!getToken()) return;
+    try {
+      setUser(await getMe());
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const value = {
     user,
     isLoading,
     login,
-    logout
+    logout,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

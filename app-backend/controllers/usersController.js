@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ErrorResponse from "../utils/errorResponse.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { uploadAvatarToCloudinary, safeDeleteFromCloudinary } from "../config/cloudinary.js";
 
 
 export const createUser = asyncHandler(async (req, res) => {
@@ -49,7 +50,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         throw new ErrorResponse("Not authorized to access this route", 403);
     }
 
-    const users = await User.find();
+    const users = await User.find().select('-password -profilePicturePublicId');
     res.status(200).json({
         status: "success",
         message: "Users fetched successfully",
@@ -193,6 +194,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
+    user.mustChangePassword = false;
     await user.save();
 
     res.status(200).json({
@@ -202,8 +204,74 @@ export const changePassword = asyncHandler(async (req, res) => {
 });
 
 
+export const adminResetPassword = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+        throw new ErrorResponse("Password must be at least 6 characters", 400);
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+        throw new ErrorResponse("User not found", 404);
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.mustChangePassword = true;
+    await user.save();
+
+    res.status(200).json({
+        status: "success",
+        message: "Password reset successfully"
+    });
+});
+
+
+export const updateCurrentUser = asyncHandler(async (req, res) => {
+    const { firstName, lastName, phone } = req.body;
+
+    if (!firstName || firstName.trim().length < 2) {
+        throw new ErrorResponse("First name must be at least 2 characters", 400);
+    }
+
+    const updated = await User.findByIdAndUpdate(
+        req.user.id,
+        { firstName: firstName.trim(), lastName: lastName?.trim() || '', phone: phone?.trim() || '' },
+        { new: true, runValidators: true }
+    ).select('-password -profilePicturePublicId');
+
+    if (!updated) throw new ErrorResponse("User not found", 404);
+
+    res.status(200).json({ status: "success", message: "Profile updated successfully", data: updated });
+});
+
+
+export const uploadAvatar = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new ErrorResponse("No image file provided", 400);
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) throw new ErrorResponse("User not found", 404);
+
+    // Delete previous avatar from Cloudinary before uploading new one
+    if (user.profilePicturePublicId) {
+        await safeDeleteFromCloudinary(user.profilePicturePublicId);
+    }
+
+    const result = await uploadAvatarToCloudinary(req.file.buffer);
+    user.profilePicture = result.secure_url;
+    user.profilePicturePublicId = result.public_id;
+    await user.save();
+
+    const updatedUser = await User.findById(req.user.id).select('-password -profilePicturePublicId');
+    res.status(200).json({ status: "success", message: "Avatar uploaded successfully", data: updatedUser });
+});
+
+
 export const getCurrentUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password -profilePicturePublicId');
     
     if (!user) {
         throw new ErrorResponse("User not found", 404);

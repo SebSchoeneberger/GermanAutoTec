@@ -30,6 +30,26 @@ export const uploadToCloudinary = (buffer) => {
 };
 
 /**
+ * Upload a user avatar buffer to Cloudinary.
+ * Stored in a separate folder; hard-cropped to 400×400 square.
+ */
+export const uploadAvatarToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'german-autotec/avatars',
+                transformation: { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            },
+        );
+        stream.end(buffer);
+    });
+};
+
+/**
  * Delete an asset from Cloudinary by its public_id.
  * Errors are intentionally NOT thrown — a failed delete must never block the main operation.
  */

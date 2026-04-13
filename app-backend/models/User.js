@@ -23,6 +23,10 @@ const userSchema = new Schema({
         minlength: [6, 'Password must be at least 6 characters']
     },
     role: {type: String, required: true, enum: ['admin', 'manager', 'accountant', 'mechanic', 'receptionist', 'workshop', 'user'], default: 'user'},
+    mustChangePassword: {type: Boolean, default: true},
+    profilePicture: {type: String},
+    profilePicturePublicId: {type: String},
+    phone: {type: String, trim: true},
 });
 
 const User = model("User", userSchema);

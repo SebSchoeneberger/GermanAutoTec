@@ -21,6 +21,8 @@ import {
   adminCreateLeaveRecord,
 } from '../../services/timeApi';
 import { canAccessTeamTime } from '../../utils/timeAccess';
+import { avatarColor, getInitials } from '../../utils/userUtils';
+import { getCloudinaryUrl } from '../../utils/imageUtils';
 import {
   formatAddisTime,
   formatWorkDateWeekday,
@@ -465,7 +467,7 @@ const TimeTeam = () => {
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition ${
+            className={`flex-1 flex items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] font-semibold transition ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-[#1f2937] text-gray-900 dark:text-white shadow-sm'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -521,7 +523,6 @@ const TimeTeam = () => {
                 }).map((emp) => {
                   const isIn = emp.todayStatus === 'checked_in';
                   const hasAlert = Boolean(emp.todayAnomalies?.length);
-                  const initials = `${emp.firstName?.[0] || ''}${emp.lastName?.[0] || ''}`.toUpperCase();
                   return (
                     <button
                       key={emp.employeeId}
@@ -529,16 +530,26 @@ const TimeTeam = () => {
                       onClick={() => { setSelected(emp); setShowManagePunches(false); setActiveTab('employee'); }}
                       className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/3 transition"
                     >
-                      {/* Initials bubble */}
-                      <span className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        hasAlert
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                          : isIn
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                          : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
-                      }`}>
-                        {initials}
-                      </span>
+                      {/* Avatar */}
+                      <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                        {emp.profilePicture ? (
+                          <img
+                            src={getCloudinaryUrl(emp.profilePicture, { width: 72, height: 72, crop: 'fill' })}
+                            alt={`${emp.firstName} ${emp.lastName}`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className={`w-full h-full flex items-center justify-center text-xs font-bold ${
+                            hasAlert
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                              : isIn
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                              : avatarColor(String(emp.employeeId))
+                          } ${!hasAlert && !isIn ? 'text-white' : ''}`}>
+                            {getInitials(emp)}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{emp.firstName} {emp.lastName}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -587,7 +598,6 @@ const TimeTeam = () => {
               {(() => {
                 const isIn = selected.todayStatus === 'checked_in';
                 const hasAlert = Boolean(detail?.todayAnomalies?.length);
-                const initials = `${selected.firstName?.[0] || ''}${selected.lastName?.[0] || ''}`.toUpperCase();
                 return (
                   <div className={`rounded-2xl border px-4 py-4 mb-4 ${
                     hasAlert
@@ -598,15 +608,25 @@ const TimeTeam = () => {
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                          hasAlert
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                            : isIn
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                            : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-gray-400'
-                        }`}>
-                          {initials}
-                        </span>
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                          {selected.profilePicture ? (
+                            <img
+                              src={getCloudinaryUrl(selected.profilePicture, { width: 80, height: 80, crop: 'fill' })}
+                              alt={`${selected.firstName} ${selected.lastName}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className={`w-full h-full flex items-center justify-center text-sm font-bold ${
+                              hasAlert
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                : isIn
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : avatarColor(String(selected.employeeId))
+                            } ${!hasAlert && !isIn ? 'text-white' : ''}`}>
+                              {getInitials(selected)}
+                            </span>
+                          )}
+                        </div>
                         <div>
                           <p className={`text-base font-bold ${hasAlert ? 'text-amber-700 dark:text-amber-300' : isIn ? 'text-emerald-700 dark:text-emerald-300' : 'text-gray-900 dark:text-white'}`}>
                             {selected.firstName} {selected.lastName}

@@ -14,9 +14,25 @@ const fieldClass = (hasError) => `${inputClass} ${hasError ? errorBorder : norma
 const FieldError = ({ msg }) =>
   msg ? <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{msg}</p> : null;
 
+const EyeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.97 9.97 0 012.51-4.03M6.53 6.53A9.97 9.97 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.97 9.97 0 01-1.357 2.67M6.53 6.53L3 3m3.53 3.53l11.94 11.94M16.47 16.47L21 21" />
+  </svg>
+);
+
 const SetPassword = () => {
   const { user, logout } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   const {
     register,
@@ -67,12 +83,22 @@ const SetPassword = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Temporary password
               </label>
-              <input
-                type="password"
-                className={fieldClass(!!errors.currentPassword)}
-                placeholder="Enter the temporary password"
-                {...register('currentPassword', { required: 'Temporary password is required' })}
-              />
+              <div className="relative">
+                <input
+                  type={showCurrentPw ? 'text' : 'password'}
+                  className={fieldClass(!!errors.currentPassword)}
+                  placeholder="Enter the temporary password"
+                  {...register('currentPassword', { required: 'Temporary password is required' })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPw((v) => !v)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label={showCurrentPw ? 'Hide password' : 'Show password'}
+                >
+                  {showCurrentPw ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
               <FieldError msg={errors.currentPassword?.message} />
             </div>
 
@@ -80,15 +106,25 @@ const SetPassword = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 New password
               </label>
-              <input
-                type="password"
-                className={fieldClass(!!errors.newPassword)}
-                placeholder="At least 6 characters"
-                {...register('newPassword', {
-                  required: 'New password is required',
-                  minLength: { value: 6, message: 'Must be at least 6 characters' },
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={showNewPw ? 'text' : 'password'}
+                  className={fieldClass(!!errors.newPassword)}
+                  placeholder="At least 6 characters"
+                  {...register('newPassword', {
+                    required: 'New password is required',
+                    minLength: { value: 6, message: 'Must be at least 6 characters' },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPw((v) => !v)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label={showNewPw ? 'Hide password' : 'Show password'}
+                >
+                  {showNewPw ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
               <FieldError msg={errors.newPassword?.message} />
             </div>
 
@@ -96,15 +132,25 @@ const SetPassword = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm new password
               </label>
-              <input
-                type="password"
-                className={fieldClass(!!errors.confirmPassword)}
-                placeholder="Repeat your new password"
-                {...register('confirmPassword', {
-                  required: 'Please confirm your password',
-                  validate: (v) => v === newPassword || 'Passwords do not match',
-                })}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPw ? 'text' : 'password'}
+                  className={fieldClass(!!errors.confirmPassword)}
+                  placeholder="Repeat your new password"
+                  {...register('confirmPassword', {
+                    required: 'Please confirm your password',
+                    validate: (v) => v === newPassword || 'Passwords do not match',
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPw((v) => !v)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPw ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
               <FieldError msg={errors.confirmPassword?.message} />
             </div>
 

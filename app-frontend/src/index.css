@@ -36,3 +36,18 @@ html, body, #root {
                 linear-gradient(135deg, #1C262D, #8C9090) border-box;
   }
 }
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 350ms ease-out forwards;
+}

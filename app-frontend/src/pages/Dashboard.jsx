@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import CreateUserModal from '../components/users/CreateUserModal';
 import DashboardCard from '../components/DashboardCard';
 import { canAccessMyTime, canAccessTeamTime, getTimeHomePath } from '../utils/timeAccess';
 
@@ -44,7 +42,6 @@ const TimeIcon = () => (
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <section className="py-2">
@@ -54,7 +51,14 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <DashboardCard title="Users" icon={<UsersIcon />} description="Manage users in the system." />
+        {user?.role === 'admin' && (
+          <DashboardCard
+            title="Employees"
+            icon={<UsersIcon />}
+            description="Add, edit, or remove employees and manage their roles."
+            onClick={() => navigate('/users')}
+          />
+        )}
         <DashboardCard title="Spare Parts" icon={<SparePartsIcon />} description="Manage spare parts in the inventory." onClick={() => navigate('/spare-parts')} />
         <DashboardCard title="Points" icon={<PointsIcon />} description="See and request points." />
         <DashboardCard title="Financials" icon={<FinancialsIcon />} description="See and manage financial data." />
@@ -79,19 +83,6 @@ const AdminDashboard = () => {
           />
         )}
       </div>
-
-      {user?.role === 'admin' && (
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-brand-dark/50 focus:ring-offset-2 dark:focus:ring-offset-[#0a0a0b]"
-          >
-            Create new user
-          </button>
-          <CreateUserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-        </div>
-      )}
     </section>
   );
 };

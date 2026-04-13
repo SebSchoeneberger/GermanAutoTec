@@ -10,12 +10,13 @@ import {
 } from '../utils/timeAccess';
 
 function buildNavItems(role) {
-  const items = [
-    { to: '/', label: 'Home' },
-  ];
+  const items = [];
   if (role !== 'workshop') {
     items.push({ to: '/dashboard', label: 'Dashboard' });
     items.push({ to: '/spare-parts', label: 'Inventory' });
+  }
+  if (role === 'admin') {
+    items.push({ to: '/users', label: 'Employees' });
   }
   if (canAccessTeamTime(role) || canAccessMyTime(role)) {
     items.push({ to: getTimeHomePath(role), label: 'Time Management' });
@@ -36,7 +37,7 @@ const AuthenticatedNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const linkClass = (to) => {
-    const active = pathname === to || (to !== '/' && pathname.startsWith(to));
+    const active = pathname === to || pathname.startsWith(to);
     return `text-sm font-medium transition ${
       active
         ? 'text-brand-dark dark:text-white'
@@ -111,7 +112,7 @@ const AuthenticatedNavbar = () => {
                 to={item.to}
                 onClick={() => setMenuOpen(false)}
                 className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition ${
-                  pathname === item.to || (item.to !== '/' && pathname.startsWith(item.to))
+                  pathname === item.to || pathname.startsWith(item.to)
                     ? 'text-brand-dark dark:text-white bg-gray-50 dark:bg-white/5'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
                 }`}

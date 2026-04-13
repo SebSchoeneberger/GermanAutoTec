@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { createUser } from '../../services/userApi';
+import { resetUserPassword } from '../../services/userApi';
 
 const inputClass =
-  'w-full px-3 py-2 border rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition text-sm';
+  'w-full px-3 py-2.5 border rounded-xl bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 transition text-sm';
 const normalBorder = 'border-gray-200 dark:border-white/10 focus:ring-brand-dark/40 dark:focus:ring-white/20';
 const errorBorder = 'border-red-400 dark:border-red-500 focus:ring-red-400/40';
 
@@ -26,37 +26,36 @@ const EyeOffIcon = () => (
   </svg>
 );
 
-const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
+const ResetPasswordModal = ({ user, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: { role: 'mechanic' } });
+  } = useForm();
 
   useEffect(() => {
-    if (!isOpen) reset({ role: 'mechanic' });
-  }, [isOpen, reset]);
+    if (!user) reset();
+  }, [user, reset]);
 
   const onSubmit = async (data) => {
     try {
-      await createUser(data);
-      toast.success('Employee created successfully');
-      onSuccess?.();
+      await resetUserPassword(user._id, data.password);
+      toast.success(`Temporary password set for ${user.firstName}`);
       onClose();
     } catch (e) {
-      toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to create employee');
+      toast.error(e.response?.data?.message || e.response?.data?.error || 'Failed to reset password');
     }
   };
 
-  if (!isOpen) return null;
+  if (!user) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 dark:bg-black/70 z-50 p-4">
-      <div className="bg-white dark:bg-[#141518] text-gray-900 dark:text-gray-100 p-5 sm:p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-white/10 max-w-md w-full max-h-[92vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Add employee</h2>
+      <div className="bg-white dark:bg-[#141518] text-gray-900 dark:text-gray-100 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-white/10 max-w-sm w-full">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">Reset password</h2>
           <button
             type="button"
             onClick={onClose}
@@ -69,56 +68,23 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
           </button>
         </div>
 
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Set a new temporary password for{' '}
+          <span className="font-semibold text-gray-700 dark:text-gray-200">{user.firstName} {user.lastName}</span>.
+          They will be prompted to change it on next login.
+        </p>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First name</label>
-            <input
-              type="text"
-              className={fieldClass(!!errors.firstName)}
-              {...register('firstName', {
-                required: 'First name is required',
-                minLength: { value: 2, message: 'Must be at least 2 characters' },
-              })}
-            />
-            <FieldError msg={errors.firstName?.message} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last name</label>
-            <input
-              type="text"
-              className={fieldClass(!!errors.lastName)}
-              {...register('lastName', { required: 'Last name is required' })}
-            />
-            <FieldError msg={errors.lastName?.message} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-            <input
-              type="email"
-              className={fieldClass(!!errors.email)}
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Enter a valid email address',
-                },
-              })}
-            />
-            <FieldError msg={errors.email?.message} />
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Temporary password
+              New temporary password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 className={fieldClass(!!errors.password)}
-                placeholder="Employee will change this on first login"
+                placeholder="At least 6 characters"
                 {...register('password', {
                   required: 'Password is required',
                   minLength: { value: 6, message: 'Must be at least 6 characters' },
@@ -134,21 +100,6 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               </button>
             </div>
             <FieldError msg={errors.password?.message} />
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              Share this with the employee — they&apos;ll be prompted to change it.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
-            <select className={fieldClass(false)} {...register('role')}>
-              <option value="mechanic">Mechanic</option>
-              <option value="manager">Manager</option>
-              <option value="accountant">Accountant</option>
-              <option value="receptionist">Receptionist</option>
-              <option value="workshop">Workshop display (QR tablet only)</option>
-              <option value="user">User</option>
-            </select>
           </div>
 
           <div className="flex gap-3 pt-1">
@@ -164,7 +115,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               disabled={isSubmitting}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-dark hover:bg-[#2a3640] disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {isSubmitting ? 'Creating…' : 'Create employee'}
+              {isSubmitting ? 'Setting…' : 'Set password'}
             </button>
           </div>
         </form>
@@ -173,4 +124,4 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-export default CreateUserModal;
+export default ResetPasswordModal;

@@ -616,7 +616,7 @@ export const getTeamOverview = asyncHandler(async (req, res) => {
   const { start: dayStart, end: dayEnd } = addisWorkDateToUtcRange(workDate);
 
   const [allEmployees, todayPunches, pendingCorrectionsCount, holidayDates, todayApprovedLeaves] = await Promise.all([
-    User.find({ role: { $in: PUNCH_ROLES } }).select("firstName lastName role email").sort({ firstName: 1, lastName: 1 }).lean(),
+    User.find({ role: { $in: PUNCH_ROLES } }).select("firstName lastName role email profilePicture").sort({ firstName: 1, lastName: 1 }).lean(),
     TimePunch.find({ at: { $gte: dayStart, $lt: dayEnd } }).sort({ employee: 1, at: 1 }).lean(),
     TimeCorrectionRequest.countDocuments({ status: "pending" }),
     fetchHolidaySet(workDate, workDate),
@@ -648,6 +648,7 @@ export const getTeamOverview = asyncHandler(async (req, res) => {
       firstName: emp.firstName,
       lastName: emp.lastName,
       role: emp.role,
+      profilePicture: emp.profilePicture || null,
       todayStatus: status,
       isOnLeaveToday,
       todayAnomalies,
@@ -752,7 +753,7 @@ export const getEmployeeSummary = asyncHandler(async (req, res) => {
       viewMonth: monthRef.month,
       isCurrentMonth: !isHistorical,
       todayStatus: buildTodayStatusFromPunches(todayPunches),
-      todayAnomalies: todaySummary.anomalies,
+      todayAnomalies: (holidayDates.has(todayWorkDate) || leaveDates.has(todayWorkDate)) ? [] : todaySummary.anomalies,
       today: {
         punches: todayPunches.map((p) => ({
           id: p.id,

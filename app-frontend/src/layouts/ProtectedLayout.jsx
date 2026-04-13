@@ -13,6 +13,10 @@ const ProtectedLayout = () => {
         return <Navigate to="/login" state={{ from: `${pathname}${search}${hash}` }} replace />;
     }
 
+    if (user.mustChangePassword && pathname !== '/set-password') {
+        return <Navigate to="/set-password" replace />;
+    }
+
     return <Outlet />;
 };
 
